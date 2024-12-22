@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { Button, Container, Table, Alert, Modal, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import * as tf from "@tensorflow/tfjs"
+// const speech = speechCommands.create('BROWSER_FFT');
+// import * as speech from "@tensorflow-models/speech-commands"
 
 class Administrador extends Component {
   state = {
@@ -11,10 +14,14 @@ class Administrador extends Component {
     showDeleteModal: false,
     audioToDelete: null,
     isLoading: false,
+    model: null,
+    action: null,
+    labels: null
   };
 
   componentDidMount() {
     this.fetchAudios();
+    this.loadModel()
   }
 
   fetchAudios = () => {
@@ -34,6 +41,30 @@ class Administrador extends Component {
         });
       });
   };
+
+  loadModel = async () => {
+    const recognizer = speechCommands.create('BROWSER_FFT');
+    console.log("Model Loaded")
+    await recognizer.ensureModelLoaded()
+    console.log(recognizer.wordLabels())
+    this.setState({
+      model: recognizer,
+      labels: recognizer.wordLabels()
+    })
+  }
+
+  recognizeCommands = async () => {
+    console.log("Listening for commands");
+    this.state.model.listen(result => {
+      console.log(result.scores);
+      const tensor_resultados = tf.tensor(result.scores)
+      const maxValue = tensor_resultados.argMax().dataSync()[0];
+      console.log('Máximo:', maxValue);
+      console.log('Comando:', this.state.labels[maxValue]);
+      
+    }, {includeSprectogram:true, probabilityThreshold: 0.9})
+    
+  }
 
   showAlertMessage = (message) => {
     this.setState({
@@ -84,6 +115,10 @@ class Administrador extends Component {
       alertText,
       showDeleteModal,
       isLoading,
+      model,
+      action,
+      audioToDelete,
+      labels
     } = this.state;
 
     return (
@@ -166,6 +201,10 @@ class Administrador extends Component {
               </tbody>
             </Table>
           )}
+
+          <button onClick={this.recognizeCommands}>
+            Command
+          </button>
 
           <Modal show={showDeleteModal} onHide={this.handleDeleteCancel}>
             <Modal.Header closeButton>
