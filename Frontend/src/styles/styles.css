@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .MarginContainer {
     margin-top: 24px;
 }

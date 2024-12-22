@@ -202,7 +202,7 @@ class Administrador extends Component {
             </Table>
           )}
 
-          <button onClick={this.recognizeCommands}>
+          <button class="bg-red-500" onClick={this.recognizeCommands}>
             Command
           </button>
 
