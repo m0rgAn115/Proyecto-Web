@@ -1,0 +1,372 @@
+.MarginContainer {
+    margin-top: 24px;
+}
+
+.AlignCenter {
+    text-align: center;
+    display: flex;
+    margin: auto;
+    justify-content: center;
+}
+
+.CustomLink {
+    color: white;
+    text-decoration: none;
+}
+
+.CustomLink:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.M-6 {
+    margin:6px;
+}
+
+.ImageContainer {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+}
+
+.ButtonEdit {
+    background-color: #ffc107; 
+    margin: 0px 2px 0px 2px;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ButtonEdit:hover {
+    background-color: #e0a800; 
+  }
+  
+
+  .ButtonDelete {
+    background-color: #dc3545;
+    margin: 0px 2px 0px 2px;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ButtonDelete:hover {
+    background-color: #a21926; 
+  }
+  
+
+  .ButtonView {
+    background-color: #1194bb;
+    margin: 0px 2px 0px 2px;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ButtonView:hover {
+    background-color: #0d4c60;; 
+  }
+
+  .ButtonProbar {
+    background-color: #ffa03a; 
+    margin: 0px 2px 0px 2px;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ButtonProbar:hover {
+    background-color: #d3730d; 
+  }
+  
+  .ButtonIcon {
+    font-size: 20px;
+    margin: 5px, 5px, 5px, 5px; 
+  }
+  
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0B294C;
+  padding: 10px 20px;
+  height: 100%;
+}
+
+.admin-welcome {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFFFFF;
+  font-family: 'Montserrat Alternates', serif;
+}
+
+.logout-button {
+  background-color: #D9D9D9;
+  border: none;
+  box-shadow: 10px 10px 15px 5px rgba(0, 0, 0, 0.5);
+  color: #0B294C;
+  padding: 5px 15px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: 'Montserrat Alternates', serif;
+  height: 30px;
+  width: 100px;
+}
+
+.logout-button:hover {
+  background-color: #b7b6b6;
+}
+
+.admin-container {
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.admin-title {
+  text-align: center;
+  font-size: 35px;
+  color: #0B294C;
+  margin-bottom: 20px;
+  font-family: 'Jockey One', sans-serif;
+}
+
+.custom-table {
+  margin-top: 5cqmin;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.custom-table thead th {
+  background-color: #567C8D;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.custom-table tbody td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #c8d9e6b8;
+}
+
+/* CREAR AUDIO */
+
+.buttons-crear {
+  display: flex;
+  gap: 20px; /* Espacio entre los botones */
+  justify-content: center; /* Centra los botones en el contenedor */
+}
+
+.crear-audio-container-Crear {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 10px 10px 15px 5px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.probar-audio-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 10px 10px 15px 5px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.Contener_formulario{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.form-header-Crear {
+  margin: 20px;
+}
+
+.form-header-Crear h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-family: 'Jockey One', sans-serif;
+}
+
+.form-header-Crear p {
+  color: #777;
+  font-size: 1rem;
+}
+
+
+.upload-area-Crear {
+  border: 2px dashed #007bff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upload-area-Crear:hover {
+  background-color: #e9f5ff;
+}
+
+.upload-label-Crear {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.file-input-Crear {
+  display: none;
+}
+
+.choose-file-button-Crear {
+  margin-top: 10px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+
+  display: flex;
+  align-items: center; 
+  gap: 8px; 
+}
+
+.choose-file-button-Crear:hover {
+  background-color: #0056b3;
+}
+
+.ButtonIcon {
+  font-size: 20px; 
+  vertical-align: middle; 
+}
+
+
+.input-group-Crear {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group-Crear label {
+  font-size: 1rem;
+  color: #333;
+}
+
+.input-group-Crear input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.cronometro{
+  margin-top: "10px";
+  padding: 10px;
+  font-size: "20px";
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+
+.contenedor__resultados{
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.contenedor__resultados textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.submit-button-Crear {
+  width: 100%;
+  padding: 10px;
+  background-color: #253c9a;
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat Alternates', serif;
+  margin-bottom: 10px;
+}
+
+.submit-button-Crear:hover {
+  background-color: #11205d;
+}
+
+.probar-button-Probar {
+  width: 100%;
+  padding: 10px;
+  background-color: #1194bb;
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat Alternates', serif;
+  margin-bottom: 10px;
+}
+
+.probar-button-Probar:hover {
+  background-color: #253c9a;
+}
+
+.submit-button-Cancelar {
+  width: 100%;
+  padding: 10px;
+  background-color: #ef1313;
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat Alternates', serif;
+  margin-bottom: 10px;
+}
+
+.submit-button-Cancelar:hover {
+  background-color: #8f2222;
+}
+
+.page-background-Crear {
+  background-color: #0B294C;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
