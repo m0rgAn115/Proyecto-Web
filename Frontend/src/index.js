@@ -9,6 +9,7 @@ import ProbarAudio from "./components/CRUD/probarAudio";
 import Presentacion from "./presentacion";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/styles.css";
+import Memoria from "./components/Juegos/Memoria";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route exact path="/Proyecto/verAudio/:audioId" component={VerAudio} />
         <Route exact path="/Proyecto/probarAudio/:audioId" component={ProbarAudio} />
         <Route exact path="/Proyecto/CrearAudio" component={CrearAudio} />
+        <Route exact path="/Juegos" component={Memoria} />
         <Route path="*" render={() => <h1>RECURSO NO ENCONTRADO</h1>} />
       </Switch>
     </Router>

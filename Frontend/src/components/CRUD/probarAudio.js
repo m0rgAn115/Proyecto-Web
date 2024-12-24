@@ -12,6 +12,41 @@ const ProbarAudio = () => {
   const [time, setTime] = useState(0); 
   const [isRunning, setIsRunning] = useState(false);
   const [evaluacion, setEvaluacion] = useState("cumple"); 
+  const [model, setmodel] = useState(null)
+  const [action, setaction] = useState(null)
+  const [labels, setlabels] = useState(null)
+  const [comandos, setcomandos] = useState([])
+  const [isListening, setisListening] = useState(false)
+
+
+  const loadModel = async () => {
+      const recognizer = speechCommands.create('BROWSER_FFT');
+      console.log("Model Loaded")
+      await recognizer.ensureModelLoaded()
+      console.log(recognizer.wordLabels())
+
+      setmodel(recognizer)
+      setlabels(recognizer.wordLabels())
+    }
+  
+  const recognizeCommands = async () => {
+    
+      console.log("Listening for commands");
+
+      model.listen((result) => {
+        const tensor_resultados = tf.tensor(result.scores);
+        const maxValue = tensor_resultados.argMax().dataSync()[0];
+        const comando =  labels[maxValue];
+        console.log("comando: ", comando);
+        
+
+        setcomandos(prev => (
+          [prev,comando]
+        ))
+
+      },{ includeSpectrogram: true, probabilityThreshold: 0.99 })
+  
+    };
 
   useEffect(() => {
     if (audioId) {
@@ -31,6 +66,11 @@ const ProbarAudio = () => {
   }, [audioId]);
 
   useEffect(() => {
+    loadModel()
+  }, [])
+  
+
+  useEffect(() => {
     let interval;
     if (isRunning) {
       interval = setInterval(() => {
@@ -43,9 +83,18 @@ const ProbarAudio = () => {
   }, [isRunning]);
 
   const handleProbarAudio = () => {
-    setTranscripcion("Simulacion de texto xd");
-    setTime(0); 
-    setIsRunning(true); 
+    if(isListening){
+      setisListening(false)
+      setIsRunning(false); 
+      model.stopListening()
+    }else {
+      setisListening(true)
+      console.log("entro")
+      recognizeCommands()
+      setTime(0); 
+      setIsRunning(true); 
+    }
+    
   };
 
   const formatTime = (time) => {
@@ -116,7 +165,7 @@ const ProbarAudio = () => {
                         onClick={handleProbarAudio}
                         className="probar-button-Probar"
                     >
-                        Probar Audio
+                        {isListening ? "Detener Prueba"  :  "Probar Audio"}
                     </Button>
                   </div>
               </Form>
@@ -128,7 +177,7 @@ const ProbarAudio = () => {
                         readOnly
                         rows="5"
                         cols="50"
-                        value={transcripcion} 
+                        value={comandos} 
                     />
 
                     <div className="cronometro">
