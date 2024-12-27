@@ -13,12 +13,15 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: ["style-loader", "css-loader"]
+                use: [
+                    "style-loader",
+                    "css-loader",
+                    "postcss-loader" // Agregar postcss-loader para procesar Tailwind CSS
+                ]
             },
-            
             {
                 test: /\.(png|jpe?g|gif|svg|jpg)$/i,
-                type: 'asset/resource' // Trata los archivos coincidentes como recursos, moviéndolos a la carpeta de salida y generando una URL para su uso en la aplicación
+                type: 'asset/resource' // Trata los archivos como recursos estáticos
             },
         ]
     },

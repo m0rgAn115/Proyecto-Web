@@ -10,6 +10,8 @@ import Presentacion from "./presentacion";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/styles.css";
 import Memoria from "./components/Juegos/Memoria";
+import './index.css';
+
 
 const App = () => {
   return (

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import App from "./src";
 import 'regenerator-runtime/runtime';
+import './index.css';
 
 
 ReactDOM.render(
