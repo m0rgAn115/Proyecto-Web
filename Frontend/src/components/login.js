@@ -8,7 +8,7 @@ class Login extends React.Component {
   constructor() {
     super();
     this.state = {
-      condition: false,
+      condition: true,
       tipousuario: '',
       usuario: '',
       password: '',
@@ -87,7 +87,7 @@ class Login extends React.Component {
     const { condition, tipousuario, usuario, password, error, showModal, validado } = this.state;
 
     if (condition) {
-      return <Redirect to={`/Proyecto/${tipousuario}`} />;
+      return <Redirect to={`/juegos`} />;
     } //
 
     return (
