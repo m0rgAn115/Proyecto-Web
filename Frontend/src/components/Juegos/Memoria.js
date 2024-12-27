@@ -351,7 +351,7 @@ class Memoria extends Component {
               className="px-5 hover:scale-[1.03] hover:bg-blue-600 py-2 bg-blue-500 text-white font-bold rounded"
               onClick={this.iniciarRonda}
             >
-              Comenzar!
+              Empezar!
             </button>
           </>
 
