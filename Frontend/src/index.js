@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/styles.css";
 import Memoria from "./components/Juegos/Memoria";
 import './index.css';
+import EditarPartida from "./components/CRUD/editar";
 
 
 const App = () => {
@@ -20,7 +21,7 @@ const App = () => {
         <Route exact path="/" component={Login} />
         <Route exact path="/index.html" component={Presentacion} />
         <Route exact path="/Proyecto/administrador" component={Administrador} />
-        <Route exact path="/Proyecto/editar/:partidaId" component={Editar} />
+        <Route exact path="/Proyecto/editar/:partidaId" component={EditarPartida} />
         <Route exact path="/Proyecto/verPartida/:partidaId" component={VerPartida} />
         <Route exact path="/Proyecto/probarPartida/:partidaId" component={ProbarPartida} />
         <Route exact path="/Proyecto/CrearPartida" component={CrearPartida} />
