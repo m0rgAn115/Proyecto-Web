@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom"; 
+import { useParams } from "react-router-dom"; 
 import axios from "axios";
 
-const EditarPartida = () => {
+const VerPartida = () => {
   const { partidaId } = useParams(); 
   const [partidaData, setPartidaData] = useState(null);
-  const [nombrePartida, setNombrePartida] = useState("");
-  const [descripcion, setDescripcion] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const history = useHistory();
 
   useEffect(() => {
     if (partidaId) {
@@ -18,9 +14,7 @@ const EditarPartida = () => {
       axios
         .get(`http://localhost:9999/partidas/${partidaId}`)
         .then((response) => {
-          setPartidaData(response.data);
-          setNombrePartida(response.data.nombrePartida);
-          setDescripcion(response.data.descripcion);
+          setPartidaData(response.data); 
           setLoading(false); 
         })
         .catch((err) => {
@@ -31,45 +25,17 @@ const EditarPartida = () => {
     }
   }, [partidaId]); 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
-    axios
-      .put(`http://localhost:9999/partidas/${partidaId}`, {
-        nombrePartida,
-        descripcion,
-      })
-      .then((response) => {
-        setSuccess("La partida se actualizó correctamente.");
-        setTimeout(() => {
-          history.push(`/Proyecto/administrador`);
-        }, 2000);
-      })
-      .catch((err) => {
-        console.error("Error al actualizar la partida", err);
-        setError("Hubo un problema al actualizar la partida. Inténtalo de nuevo.");
-      });
-  };
-
   return (
     <div className="bg-[#0B294C] min-h-screen flex justify-center items-center p-5">
       <div className="max-w-[600px] mx-auto p-5 bg-white rounded-lg shadow-lg text-center">
         <div className="mb-5">
-          <h2 className="text-2xl text-gray-800 font-bold mb-2 font-jockey">Editar Partida</h2>
-          <p className="text-gray-600">Modifica el nombre o la descripción de la partida.</p>
+          <h2 className="text-2xl text-gray-800 font-bold mb-2 font-jockey">Ver Partida</h2>
+          <p className="text-gray-600">Visualiza los detalles de la partida.</p>
         </div>
 
         {error && (
           <div className="bg-red-100 text-red-600 border border-red-500 rounded-md p-3 mb-5">
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-100 text-green-600 border border-green-500 rounded-md p-3 mb-5">
-            {success}
           </div>
         )}
 
@@ -79,7 +45,7 @@ const EditarPartida = () => {
           </div>
         ) : (
           partidaData && (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form className="space-y-5">
               {/* ID de la partida */}
               <div className="text-left">
                 <label className="text-gray-700 font-medium">ID de la Partida:</label>
@@ -96,9 +62,9 @@ const EditarPartida = () => {
                 <label className="text-gray-700 font-medium">Nombre de la Partida:</label>
                 <input
                   type="text"
-                  value={nombrePartida}
-                  onChange={(e) => setNombrePartida(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2"
+                  value={partidaData.nombrePartida}
+                  readOnly
+                  className="w-full p-3 border border-gray-300 rounded-md mt-2 bg-gray-100"
                 />
               </div>
 
@@ -106,9 +72,9 @@ const EditarPartida = () => {
               <div className="text-left">
                 <label className="text-gray-700 font-medium">Descripción:</label>
                 <textarea
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2"
+                  value={partidaData.descripcion}
+                  readOnly
+                  className="w-full p-3 border border-gray-300 rounded-md mt-2 bg-gray-100"
                 />
               </div>
 
@@ -140,13 +106,7 @@ const EditarPartida = () => {
                   onClick={() => window.history.back()}
                   className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md"
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-700 hover:bg-blue-900 text-white py-2 px-4 rounded-md"
-                >
-                  Guardar Cambios
+                  Regresar
                 </button>
               </div>
             </form>
@@ -157,4 +117,4 @@ const EditarPartida = () => {
   );
 };
 
-export default EditarPartida;
+export default VerPartida;

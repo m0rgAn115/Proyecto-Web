@@ -238,7 +238,7 @@ class Memoria extends Component {
       <div className="flex flex-col h-screen">
         {/* Barra superior */}
         <div className="flex flex-row justify-between px-5 items-center bg-blue-800 text-white h-10 leading-none">
-          <button className="m-0 font-bold hover:scale-[1.03]">Regresar</button>
+          <button className="m-0 font-bold hover:scale-[1.03]"  onClick={() => window.history.back()}>Regresar</button>
           <p className="text-md m-0 font-bold">Juego de Memoria!</p>
           <div>
             <p className="text-sm m-0">Modo: {this.state.dificultad}</p>
