@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Administrador from "./components/administrador";
-import Editar from "./components/CRUD/editar";
+import EditarPartida from "./components/CRUD/editar";
 import VerPartida from "./components/CRUD/verPartida";
 import CrearPartida from "./components/CRUD/crearPartida"; 
 import Login from "./components/login";
