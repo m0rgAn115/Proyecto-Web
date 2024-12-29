@@ -4,8 +4,8 @@ import axios from "axios";
 
 const EditarPartida = () => {
   const { partidaId } = useParams(); 
-  const [partidaData, setPartidaData] = useState([{ id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" }]);
-  const [juegoData, setJuegoData] = useState([{ id: 1, nombre: "Juego 1", descripcion: "Descripción del juego 1" }]);
+  const [partidaData, setPartidaData] = useState(null);
+  const [juegoData, setJuegoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -29,30 +29,37 @@ const EditarPartida = () => {
   }, [partidaId]); 
 
   useEffect(() => {
-    if(partidaData?.id_juego) {
+    if (partidaData?.id_juego) {
       setLoading(true);
-      axios.get(`http://localhost:9999/partidas/${partidaData?.id_juego}`)
-        .then((response)=>{
+      axios.get(`http://localhost:9999/juegos/${partidaData.id_juego}`)
+        .then((response) => {
           setJuegoData(response.data);
           setLoading(false);
         })
-        .catch((err)=> {
+        .catch((err) => {
           console.error("Error al obtener los datos del juego", err);
           setError("Error al obtener los datos del juego");
           setLoading(false);
         });
     }
-  },[partidaData?.id_juego]);
+  }, [partidaData?.id_juego]);  
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
+  
+    if (!partidaData.nombre || !partidaData.descripcion) {
+      setError("Por favor, complete todos los campos.");
+      return;
+    }
+  
     axios
       .put(`http://localhost:9999/partidas/${partidaId}`, {
-        nombre,
-        descripcion,
+        nombre: partidaData.nombre,
+        descripcion: partidaData.descripcion,
+        id_juego: partidaData.id_juego,
+        puntuacion: partidaData.puntuacion,
       })
       .then((response) => {
         setSuccess("La partida se actualizó correctamente.");
@@ -65,6 +72,7 @@ const EditarPartida = () => {
         setError("Hubo un problema al actualizar la partida. Inténtalo de nuevo.");
       });
   };
+  
 
   return (
     <div className="bg-[#0B294C] min-h-screen flex justify-center items-center p-5">
@@ -115,7 +123,6 @@ const EditarPartida = () => {
                     <input
                       type="text"
                       value={partidaData.nombre || ""}
-                      readOnly
                       onChange={(e) => setPartidaData({...partidaData, nombre: e.target.value})}
                       className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
                     />
@@ -127,7 +134,6 @@ const EditarPartida = () => {
                     </label>
                     <textarea
                       value={partidaData.descripcion || ""}
-                      readOnly
                       onChange={(e) => setPartidaData({...partidaData, descripcion: e.target.value})}
                       className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
                     />
@@ -173,6 +179,7 @@ const EditarPartida = () => {
                 </button>
                 <button
                   type="submit"
+                  onClick={handleSubmit}
                   className="bg-blue-800 hover:bg-blue-1000 text-white py-2 px-4 rounded-md">
                   Guardar Cambios
                 </button>

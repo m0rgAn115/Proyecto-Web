@@ -112,6 +112,7 @@ class Administrador extends Component {
   };
 
 
+
   render() {
     const {
       partidas,

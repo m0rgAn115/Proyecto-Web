@@ -1,14 +1,8 @@
-const { Login, Audio } = require('./modelos.js');
+const { Rol, Usuario, Juego, Partida } = require('./modelos.js');
 const sequelize = require('./sequelize');
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
-
 const app = express();
 const puerto = 9999;
-const upload = multer();
-const uploadDir = 'AudiosCargados/';
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,35 +11,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// Crear directorio si no existe
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+app.use(express.json());
 
-// Sincronizar base de datos
-sequelize.sync({ force: false })
-  .then(() => {
-    console.log('Modelos sincronizados con la base de datos');
-    app.listen(puerto, () => {
-      console.log(`Servidor escuchando en el puerto ${puerto}`);
-    });
-  })
-  .catch(error => {
-    console.error('Error al sincronizar los modelos:', error);
-  });
+app.listen(puerto, () => {
+  console.log(`Servidor escuchando en el puerto ${puerto}`);
+});
 
 // Login de usuario
 app.get('/', async (req, res) => {
-  const { User: user, password } = req.query;
+  const { User, password } = req.query;
 
   try {
     await sequelize.authenticate();
-    const usuario = await Login.findOne({
-      where: { USERNAME: user, PASSWORD: password },
+    const usuario = await Usuario.findOne({
+      where: { username: User, password: password },
+      include: { model: Rol, as: 'rol'},
     });
 
     if (usuario) {
-      res.status(200).json({ status: 'yes', tipo: usuario.TIPOUSUARIO });
+      res.status(200).json({ status: 'yes', tipo: usuario.rol.nombre, id: usuario.id });
     } else {
       res.status(404).json({ status: 'no', tipo: 'nodefinido' });
     }
@@ -55,143 +39,137 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Subir audio
-app.post('/audios', upload.single('archivo'), async (req, res) => {
+//CRUD
+
+// Obtener partidas
+app.get('/partidas', async (req, res) => {
   try {
-    const { nombreAudio } = req.body;
-    if (!req.file || !nombreAudio) {
-      return res.status(400).json({ error: 'Nombre del audio o archivo faltante' });
-    }
-
-    const { originalname, buffer } = req.file;
-    const filePath = path.join(uploadDir, originalname);
-
-    fs.writeFileSync(filePath, buffer);
-
-    const nuevoAudio = await Audio.create({
-      nombreAudio: nombreAudio,
-      archivoMultimedia: filePath,
+    const partidas = await Partida.findAll({
+      attributes: ['id', 'id_usuario', 'id_juego', 'nombre', 'descripcion', 'puntuacion'],
     });
-
-    res.status(201).json({ message: 'Archivo guardado', id: nuevoAudio.id_audio });
+    res.status(200).json(partidas);
   } catch (error) {
-    console.error('Error al guardar el archivo:', error);
-    res.status(500).json({ error: 'Error al guardar el archivo' });
+    console.error('Error al obtener las partidas:', error);
+    res.status(500).json({ error: 'Error al obtener los partidas' });
   }
 });
 
-// Obtener audios
-app.get('/audios', async (req, res) => {
+// Obtener juegos
+app.get('/juegos', async (req, res) => {
   try {
-    const audios = await Audio.findAll({
-      attributes: ['id_audio', 'nombreAudio', 'archivoMultimedia'],
+    const juegos = await Juego.findAll({
+      attributes: ['id', 'nombre', 'descripcion'],
     });
-    res.status(200).json(audios);
+    res.status(200).json(juegos);
   } catch (error) {
-    console.error('Error al obtener los audios:', error);
-    res.status(500).json({ error: 'Error al obtener los audios' });
+    console.error('Error al obtener los juegos:', error);
+    res.status(500).json({ error: 'Error al obtener los juegos' });
   }
 });
 
-// Obtener un audio específico
-app.get('/audios/:audioId', async (req, res) => {
-  const { audioId } = req.params;
-
+// Obtener un juego específico
+app.get('/juegos/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const audio = await Audio.findOne({ where: { id_audio: audioId } });
+    const juego = await Juego.findOne({
+      where: { id },
+      attributes: ['id', 'nombre', 'descripcion'],
+    });
 
-    if (audio) {
-      const archivoMultimedia = path.basename(audio.archivoMultimedia);
-      res.status(200).json({
-        id_audio: audio.id_audio,
-        nombreAudio: audio.nombreAudio,
-        archivoMultimedia: archivoMultimedia,
-      });
+    if (juego) {
+      res.status(200).json(juego);
     } else {
-      res.status(404).json({ error: 'Audio no encontrado' });
+      res.status(404).json({ error: 'Juego no encontrado' });
     }
   } catch (error) {
-    console.error('Error al obtener el audio:', error);
-    res.status(500).json({ error: 'Error al obtener el audio' });
+    console.error('Error al obtener el juego:', error);
+    res.status(500).json({ error: 'Error al obtener el juego' });
   }
 });
 
-// Eliminar un audio
-app.delete('/audios/:id', async (req, res) => {
+//CREAR PARTIDA
+app.post('/partidas', async (req, res) => {
+  const { nombre, descripcion, id, usuario } = req.body;
+
+  try {
+    // Verificar si los datos necesarios están presentes
+    if (!nombre || !descripcion || !id) {
+      return res.status(400).json({ status: 'error', message: 'Todos los campos son obligatorios.' });
+    }
+
+    // Crear una nueva partida en la base de datos
+    const nuevaPartida = await Partida.create({
+      nombre,
+      descripcion,
+      id_juego: id,
+      id_usuario: usuario,
+    });
+
+    // Devolver una respuesta de éxito
+    res.status(201).json({message: 'Partida creada correctamente', partida: nuevaPartida,});
+  } catch (err) {
+    console.error('Error al crear la partida:', err);
+    res.status(500).json({error: 'Hubo un problema al crear la partida. Inténtalo de nuevo.' });
+  }
+});
+
+
+//VER PARTIDA
+app.get('/partidas/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const partida = await Partida.findOne({
+      where: { id },
+      attributes: ['id', 'nombre', 'descripcion', 'id_juego', 'puntuacion'],
+    });
+    res.status(200).json(partida);
+  } catch (error) {
+    console.error('Error al obtener el juego:', error);
+    res.status(500).json({ error: 'Error al obtener el juego' });
+  }
+});
+
+//EDITAR PARTIDA
+app.put('/partidas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, id_juego, puntuacion } = req.body;
+
+  try {
+    const partida = await Partida.findOne({ where: { id: id } });
+
+    partida.nombre = nombre;
+    partida.descripcion = descripcion;
+    partida.id_juego = id_juego;
+    partida.puntuacion = puntuacion;
+
+    await partida.save();
+
+    res.status(200).json({
+      message: 'Partida actualizada correctamente',
+      id: partida.id,
+      nombre: partida.nombre,
+      descripcion: partida.descripcion,
+      puntuacion: partida.puntuacion,
+      id_juego: partida.id_juego,
+    });
+  } catch (error) {
+    console.error('Error al actualizar la partida:', error);
+    res.status(500).json({ error: 'Error al actualizar la partida' });
+  }
+});
+
+
+// ELIMINAR PARTIDA
+app.delete('/partidas/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const audio = await Audio.findOne({ where: { id_audio: id } });
-
-    if (audio) {
-      const filePath = path.join(uploadDir, path.basename(audio.archivoMultimedia));
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-      await audio.destroy();
-      res.status(200).json({ message: 'Audio eliminado correctamente' });
-    } else {
-      res.status(404).json({ error: 'Audio no encontrado' });
-    }
+    const partida = await Partida.findOne({ where: { id: id } });
+    await partida.destroy();
+    res.status(200).json({ message: 'Partida eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar el audio:', error);
-    res.status(500).json({ error: 'Error al eliminar el audio' });
+    console.error('Error al eliminar el partida:', error);
+    res.status(500).json({ error: 'Error al eliminar la partida' });
   }
 });
 
-//editar
-app.put('/audios/:audioId', upload.single('archivoMultimedia'), async (req, res) => {
-  const { audioId } = req.params;
-  const { nombreAudio } = req.body;
-
-  try {
-    const audio = await Audio.findOne({ where: { id_audio: audioId } });
-
-    if (!audio) {
-      return res.status(404).json({ error: 'Audio no encontrado' });
-    }
-
-    if (req.file && req.file.buffer) {
-      const { originalname, buffer } = req.file;
-      const newFilePath = path.join(uploadDir, originalname);
-
-    //para no sobrescribir xd
-      let filePath = newFilePath;
-      let counter = 1;
-      while (fs.existsSync(filePath)) {
-        const ext = path.extname(originalname);
-        const baseName = path.basename(originalname, ext);
-        filePath = path.join(uploadDir, `${baseName}(${counter})${ext}`);
-        counter++;
-      }
-
-      try {
-
-        if (audio.archivoMultimedia && fs.existsSync(audio.archivoMultimedia)) {
-          fs.unlinkSync(audio.archivoMultimedia); // Elimina el archivo anterior
-        }
-
-        fs.writeFileSync(filePath, buffer);
-        audio.archivoMultimedia = filePath;
-        
-      } catch (error) {
-        console.error('Error al mover el archivo:', error);
-        return res.status(500).json({ error: 'Error al mover el archivo multimedia' });
-      }
-    }
-
-    if (nombreAudio) {
-      audio.nombreAudio = nombreAudio;
-    }
-    await audio.save();
-
-    res.status(200).json({
-      message: 'Audio actualizado correctamente',
-      id_audio: audio.id_audio,
-      nombreAudio: audio.nombreAudio,
-      archivoMultimedia: audio.archivoMultimedia ? path.basename(audio.archivoMultimedia) : null,
-    });
-  } catch (error) {
-    console.error('Error al actualizar el audio:', error);
-    res.status(500).json({ error: 'Error al actualizar el audio' });
-  }
-});

@@ -1,5 +1,4 @@
 npm install --save express
 npm install sequelize
 npm install express
-npm install multer
 npm install mysql2

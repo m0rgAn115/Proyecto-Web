@@ -5,8 +5,8 @@ import axios from "axios";
 
 const VerPartida = () => {
   const { partidaId } = useParams();
-  const [partidaData, setPartidaData] = useState([{ id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" }]);
-  const [juegoData, setJuegoData] = useState([{ id: 1, nombre: "Juego 1", descripcion: "Descripción del juego 1" }]);
+  const [partidaData, setPartidaData] = useState(null);
+  const [juegoData, setJuegoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 

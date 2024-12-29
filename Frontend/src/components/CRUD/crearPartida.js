@@ -10,6 +10,7 @@ const CrearPartida = () => {
   const [juegos, setJuegos] = useState([]); // Estado para almacenar los juegos obtenidos
   const [error, setError] = useState(null); 
   const history = useHistory();
+  const idUsuario = sessionStorage.getItem('id_usuario');
 
   // Cargar la lista de juegos desde la base de datos
   useEffect(() => {
@@ -55,7 +56,7 @@ const CrearPartida = () => {
     e.preventDefault();
     setError(null);
 
-    if (!nombre || !descripcion || !id) {
+    if (!nombre || !descripcion || !id ) {
       setError("Todos los campos son obligatorios.");
       return;
     }
@@ -64,6 +65,7 @@ const CrearPartida = () => {
       nombre,
       descripcion,
       id,
+      usuario: idUsuario,
     };
 
     // solicitud para crear la partida
