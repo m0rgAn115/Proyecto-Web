@@ -1,14 +1,12 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
 import backgroundImage from '../img/background_login.jpg';
-import "../styles/styles_Login.css";
-import { Alert } from 'react-bootstrap';
 
 class Login extends React.Component {
   constructor() {
     super();
     this.state = {
-      condition: true,
+      condition: false,
       tipousuario: '',
       usuario: '',
       password: '',
@@ -22,7 +20,10 @@ class Login extends React.Component {
     const { usuario, password } = this.state;
 
     if (!usuario || !password) {
-      this.setState({ error: "Por favor, complete todos los campos." });
+      this.setState({ error: "Por favor, complete todos los campos.", showModal: true });
+      setTimeout(() => {
+        this.setState({ showModal: false });
+      }, 3000); // 3 segundos para mostrar el modal
       return;
     }
 
@@ -42,7 +43,7 @@ class Login extends React.Component {
             () => {
               setTimeout(() => {
                 this.setState({ showModal: false, condition: true });
-              }, 2000);
+              }, 3000); // 3 segundos
             }
           );
         } else {
@@ -51,11 +52,12 @@ class Login extends React.Component {
             usuario: '',
             password: '',
             showModal: true,
+            validado: false,
           });
 
           setTimeout(() => {
             this.setState({ showModal: false });
-          }, 2000);
+          }, 3000); 
         }
       })
       .catch(error => {
@@ -65,92 +67,85 @@ class Login extends React.Component {
           usuario: '',
           password: '',
           showModal: true,
+          validado: false,
         });
 
         setTimeout(() => {
           this.setState({ showModal: false });
-        }, 5000);
+        }, 5000); 
       });
   }
 
   render() {
-    const styles = {
-      backgroundColor: '#e5e5e6',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      margin: '0',
-      padding: '0',
-    };
-
     const { condition, tipousuario, usuario, password, error, showModal, validado } = this.state;
 
     if (condition) {
-      return <Redirect to={`/juegos`} />;
-    } //
+      return <Redirect to={`/Proyecto/${tipousuario}`} />;
+    }
 
     return (
-      <div style={styles}>
-        <div className="login-container">
-          <div className="image-section">
-            <img src={backgroundImage} alt="Imagen de fondo" />
+      <div className="bg-gray-100 flex justify-center items-center min-h-screen">
+        <div className="flex w-[800px] h-[450px] bg-white rounded-lg shadow-lg overflow-hidden relative">
+          
+          <div className="w-1/2 bg-blue-600 flex items-center justify-center">
+            <img src={backgroundImage} alt="Imagen de fondo" className="w-full h-full object-cover" />
           </div>
 
-          <div className="form-section">
-            <h1>Hola<br />Bienvenido</h1>
+          {/* formulario */}
+          <div className="w-1/2 p-8 flex flex-col justify-center">
+            <h1 className="text-blue-600 text-4xl mb-4 text-center">
+              Hola<br />Bienvenido
+            </h1>
             {error && (
-              <div className="error-message">{error}</div>
+              <div className="bg-red-500 text-white p-3 rounded mb-4 text-center">
+                {error}
+              </div>
             )}
-            <div className="form-group">
-              <label htmlFor="usuario">Usuario</label>
+            <div className="mb-4">
+              <label htmlFor="usuario" className="text-sm text-gray-700">Usuario</label>
               <input
-                placeholder="Ingrese el usuario"
                 type="text"
                 id="usuario"
+                placeholder="Ingrese el usuario"
                 value={usuario}
                 onChange={(e) => this.setState({ usuario: e.target.value })}
+                className="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
+            <div className="mb-6">
+              <label htmlFor="password" className="text-sm text-gray-700">Password</label>
               <input
-                placeholder="Ingrese su contraseña"
                 type="password"
                 id="password"
+                placeholder="Ingrese su contraseña"
                 value={password}
                 onChange={(e) => this.setState({ password: e.target.value })}
+                className="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <button
               onClick={this.validar}
-              className="login-button"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-all"
             >
               Login
             </button>
           </div>
 
-          {/* Modal de error */}
+          
           {showModal && (
-            <div style={{
-              position: 'absolute',
-              top: '10%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              padding: '20px 50px',
-              color: 'white',
-              borderRadius: '5px',
-              opacity: '0.8',
-              zIndex: 1000,
-            }}>
-              <Alert variant={validado ? "success" :"danger"}>
-                <b>{validado ? 'Usuario Validado, redirigiendo...' : 'Usuario incorrecto'}</b>
-              </Alert>
+            <div className={`absolute top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded shadow-lg text-white ${
+              validado ? "bg-green-500" : null
+            }`}>
+              <p className="text-center font-bold">
+                {validado ? "Usuario Validado, redirigiendo..." : null}
+              </p>
             </div>
           )}
         </div>
-        <footer className="footer">
-          <p>&copy; Buendia Rodriguez Valentina | Mondragon Orta Angel Damian | Sanchez Corona Rodrigo.</p>
+
+        {/* Footer */}
+        <footer className="w-full text-center py-4 bg-blue-600 text-white fixed bottom-0 left-0">
+          <p>&copy; Buendía Rodríguez Valentina | Mondragón Orta Angel Damian | Sánchez Corona Rodrigo.</p>
         </footer>
       </div>
     );

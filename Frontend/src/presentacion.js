@@ -16,7 +16,7 @@ const Presentacion = () => {
           <h2 className="subtitulos">Integrantes del equipo:</h2>
           <ul className="informacion">
             <li>Buendía Rodríguez Valentina <br /> Boleta: 2023630575</li>
-            <li>Mondragón Orta Ángel Damián <br /> Boleta: 2023630007</li>
+            <li>Mondragón Orta Angel Damian <br /> Boleta: 2023630007</li>
             <li>Sánchez Corona Rodrigo <br /> Boleta: 2023630621</li>
           </ul>
         </header>
