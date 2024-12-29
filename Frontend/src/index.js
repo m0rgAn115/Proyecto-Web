@@ -5,14 +5,13 @@ import EditarPartida from "./components/CRUD/editar";
 import VerPartida from "./components/CRUD/verPartida";
 import CrearPartida from "./components/CRUD/crearPartida"; 
 import Login from "./components/login";
-import ProbarPartida from "./components/CRUD/probarPartida";
 import Presentacion from "./presentacion";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/styles.css";
 import Memoria from "./components/Juegos/Memoria";
+import Juego1 from "./components/Juegos/Juego1"; 
+import Juego3 from "./components/Juegos/Juego3"; 
 import './index.css';
-import EditarPartida from "./components/CRUD/editar";
-
 
 const App = () => {
   return (
@@ -23,9 +22,21 @@ const App = () => {
         <Route exact path="/Proyecto/administrador" component={Administrador} />
         <Route exact path="/Proyecto/editar/:partidaId" component={EditarPartida} />
         <Route exact path="/Proyecto/verPartida/:partidaId" component={VerPartida} />
-        <Route exact path="/Proyecto/probarPartida/:partidaId" component={ProbarPartida} />
         <Route exact path="/Proyecto/CrearPartida" component={CrearPartida} />
-        <Route exact path="/Juegos" component={Memoria} />
+        <Route exact path="/Proyecto/:idJuego"
+          render={({ match }) => {
+            const { idJuego } = match.params; // Obtén el id_juego desde la URL
+            if (idJuego === "1") {
+              return <Juego1 />;
+            } else if (idJuego === "2") {
+              return <Memoria />;
+            } else if (idJuego === "3") {
+              return <Juego3 />;
+            } else {
+              return <h2>Juego no disponible</h2>; 
+            }
+          }}
+        />
         <Route path="*" render={() => <h1>RECURSO NO ENCONTRADO</h1>} />
       </Switch>
     </Router>

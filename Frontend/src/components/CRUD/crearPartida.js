@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 
 const CrearPartida = () => {
-  const [nombrePartida, setNombrePartida] = useState(""); 
+  const [nombre, setNombre] = useState(""); 
   const [descripcion, setDescripcion] = useState(""); 
-  const [juegoSeleccionado, setJuegoSeleccionado] = useState(""); 
+  const [id, setId] = useState(""); 
+  const [juegoData, setJuegoData] = useState(null); 
+  const [juegos, setJuegos] = useState([]); // Estado para almacenar los juegos obtenidos
   const [error, setError] = useState(null); 
   const history = useHistory();
 
+  // Cargar la lista de juegos desde la base de datos
+  useEffect(() => {
+    axios
+      .get("http://localhost:9999/juegos") // Asumiendo que esta es la ruta para obtener los juegos
+      .then((response) => {
+        setJuegos(response.data); // Guardamos los juegos en el estado
+      })
+      .catch((err) => {
+        console.error("Error al obtener los juegos:", err);
+        setError("No se pudo cargar la lista de juegos.");
+      });
+  }, []);
+
   const handleNombreChange = (e) => {
-    setNombrePartida(e.target.value);
+    setNombre(e.target.value);
   };
 
   const handleDescripcionChange = (e) => {
@@ -18,31 +33,47 @@ const CrearPartida = () => {
   };
 
   const handleJuegoChange = (e) => {
-    setJuegoSeleccionado(e.target.value);
+    const selectedId = e.target.value;
+    setId(selectedId);
+    setJuegoData(null); 
+
+    if (selectedId) {
+      axios
+        .get(`http://localhost:9999/juegos/${selectedId}`)
+        .then((response) => {
+          setJuegoData(response.data); 
+        })
+        .catch((err) => {
+          console.error("Error al obtener los datos del juego:", err);
+          setError("No se pudo cargar la información del juego.");
+        });
+    }
   };
 
+  // Función para manejar el envío del formulario
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!nombrePartida || !descripcion || !juegoSeleccionado) {
+    if (!nombre || !descripcion || !id) {
       setError("Todos los campos son obligatorios.");
       return;
     }
 
     const data = {
-      nombrePartida,
+      nombre,
       descripcion,
-      juegoSeleccionado,
+      id,
     };
 
+    // solicitud para crear la partida
     axios
       .post("http://localhost:9999/partidas", data)
       .then((response) => {
         console.log("Partida creada:", response.data);
-        setNombrePartida("");
+        setNombre("");
         setDescripcion("");
-        setJuegoSeleccionado("");
+        setId("");
         history.push("/Proyecto/administrador");
       })
       .catch((error) => {
@@ -68,14 +99,14 @@ const CrearPartida = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Nombre de la partida */}
           <div className="text-left">
-            <label htmlFor="formNombrePartida" className="text-gray-700 font-medium">
+            <label htmlFor="formNombre" className="text-gray-700 font-medium">
               Nombre de la partida:
             </label>
             <input
-              id="formNombrePartida"
+              id="formNombre"
               type="text"
               placeholder="Ingresa un nombre descriptivo"
-              value={nombrePartida}
+              value={nombre}
               onChange={handleNombreChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md mt-2"
@@ -99,12 +130,12 @@ const CrearPartida = () => {
 
           {/* Selección de juego */}
           <div className="text-left">
-            <label htmlFor="formJuegoSeleccionado" className="text-gray-700 font-medium">
+            <label htmlFor="formId" className="text-gray-700 font-medium">
               Selecciona un juego:
             </label>
             <select
-              id="formJuegoSeleccionado"
-              value={juegoSeleccionado}
+              id="formId"
+              value={id}
               onChange={handleJuegoChange}
               required
               className="w-full p-3 border border-gray-300 rounded-md mt-2"
@@ -112,25 +143,24 @@ const CrearPartida = () => {
               <option value="" disabled>
                 Selecciona un juego
               </option>
-              <option value="Juego1">Juego 1</option>
-              <option value="Juego2">Juego 2</option>
-              <option value="Juego3">Juego 3</option>
+              {juegos.map((juego) => (
+                <option key={juego.id} value={juego.id}>
+                  {juego.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Botones */}
           <div className="flex gap-5 justify-center">
             <button
               type="button"
               onClick={() => window.history.back()}
-              className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md"
-            >
+              className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md">
               Cancelar
             </button>
             <button
               type="submit"
-              className="bg-blue-700 hover:bg-blue-900 text-white py-2 px-4 rounded-md"
-            >
+              className="bg-blue-700 hover:bg-blue-900 text-white py-2 px-4 rounded-md">
               Guardar
             </button>
           </div>

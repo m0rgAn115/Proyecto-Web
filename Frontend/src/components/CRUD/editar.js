@@ -4,9 +4,8 @@ import axios from "axios";
 
 const EditarPartida = () => {
   const { partidaId } = useParams(); 
-  const [partidaData, setPartidaData] = useState(null);
-  const [nombrePartida, setNombrePartida] = useState("");
-  const [descripcion, setDescripcion] = useState("");
+  const [partidaData, setPartidaData] = useState([{ id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" }]);
+  const [juegoData, setJuegoData] = useState([{ id: 1, nombre: "Juego 1", descripcion: "Descripción del juego 1" }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -19,8 +18,6 @@ const EditarPartida = () => {
         .get(`http://localhost:9999/partidas/${partidaId}`)
         .then((response) => {
           setPartidaData(response.data);
-          setNombrePartida(response.data.nombrePartida);
-          setDescripcion(response.data.descripcion);
           setLoading(false); 
         })
         .catch((err) => {
@@ -31,6 +28,22 @@ const EditarPartida = () => {
     }
   }, [partidaId]); 
 
+  useEffect(() => {
+    if(partidaData?.id_juego) {
+      setLoading(true);
+      axios.get(`http://localhost:9999/partidas/${partidaData?.id_juego}`)
+        .then((response)=>{
+          setJuegoData(response.data);
+          setLoading(false);
+        })
+        .catch((err)=> {
+          console.error("Error al obtener los datos del juego", err);
+          setError("Error al obtener los datos del juego");
+          setLoading(false);
+        });
+    }
+  },[partidaData?.id_juego]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
@@ -38,7 +51,7 @@ const EditarPartida = () => {
 
     axios
       .put(`http://localhost:9999/partidas/${partidaId}`, {
-        nombrePartida,
+        nombre,
         descripcion,
       })
       .then((response) => {
@@ -55,14 +68,14 @@ const EditarPartida = () => {
 
   return (
     <div className="bg-[#0B294C] min-h-screen flex justify-center items-center p-5">
-      <div className="max-w-[600px] mx-auto p-5 bg-white rounded-lg shadow-lg text-center">
-        <div className="mb-5">
-          <h2 className="text-2xl text-gray-800 font-bold mb-2 font-jockey">Editar Partida</h2>
+      <div className="max-w-[800px] w-full bg-white p-6 rounded-lg shadow-lg">
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-bold text-gray-800">Editar Partida</h2>
           <p className="text-gray-600">Modifica el nombre o la descripción de la partida.</p>
         </div>
 
         {error && (
-          <div className="bg-red-100 text-red-600 border border-red-500 rounded-md p-3 mb-5">
+          <div className="bg-red-100 text-red-600 text-center border border-red-500 rounded-md p-3 mb-5">
             {error}
           </div>
         )}
@@ -79,77 +92,92 @@ const EditarPartida = () => {
           </div>
         ) : (
           partidaData && (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* ID de la partida */}
-              <div className="text-left">
-                <label className="text-gray-700 font-medium">ID de la Partida:</label>
-                <input
-                  type="text"
-                  value={partidaData.id_partida}
-                  readOnly
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2 bg-gray-100"
-                />
+              <div className="grid grid-cols-2 gap-5">
+              {/* Lado izquierdo */}
+              <div className="col-span-1">
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      ID de la Partida:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.id || ""}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Nombre de la Partida:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.nombre || ""}
+                      readOnly
+                      onChange={(e) => setPartidaData({...partidaData, nombre: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Descripción:
+                    </label>
+                    <textarea
+                      value={partidaData.descripcion || ""}
+                      readOnly
+                      onChange={(e) => setPartidaData({...partidaData, descripcion: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+                </form>
               </div>
 
-              {/* Nombre de la partida */}
-              <div className="text-left">
-                <label className="text-gray-700 font-medium">Nombre de la Partida:</label>
-                <input
-                  type="text"
-                  value={nombrePartida}
-                  onChange={(e) => setNombrePartida(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2"
-                />
+              {/* Lado derecho */}
+              <div className="col-span-1">
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Juego Seleccionado:
+                    </label>
+                    <input
+                      type="text"
+                      value={juegoData.nombre || "N/A"}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Puntuación:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.puntuacion || "Sin puntuación"}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+                </form>
               </div>
 
-              {/* Descripción de la partida */}
-              <div className="text-left">
-                <label className="text-gray-700 font-medium">Descripción:</label>
-                <textarea
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2"
-                />
-              </div>
-
-              {/* Juego seleccionado */}
-              <div className="text-left">
-                <label className="text-gray-700 font-medium">Juego Seleccionado:</label>
-                <input
-                  type="text"
-                  value={partidaData.juegoSeleccionado}
-                  readOnly
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2 bg-gray-100"
-                />
-              </div>
-
-              {/* Puntuación */}
-              <div className="text-left">
-                <label className="text-gray-700 font-medium">Puntuación:</label>
-                <input
-                  type="text"
-                  value={partidaData.puntuacion || "Sin puntuación aún"}
-                  readOnly
-                  className="w-full p-3 border border-gray-300 rounded-md mt-2 bg-gray-100"
-                />
-              </div>
-
-              <div className="flex gap-5 justify-center">
+              <div className="col-span-2 flex justify-center gap-4 mt-5">
                 <button
                   type="button"
                   onClick={() => window.history.back()}
-                  className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md"
-                >
+                  className="bg-red-600 hover:bg-red-800 text-white py-2 px-4 rounded-md">
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-700 hover:bg-blue-900 text-white py-2 px-4 rounded-md"
-                >
+                  className="bg-blue-800 hover:bg-blue-1000 text-white py-2 px-4 rounded-md">
                   Guardar Cambios
                 </button>
               </div>
-            </form>
+            </div>
           )
         )}
       </div>

@@ -8,7 +8,11 @@ import * as tf from "@tensorflow/tfjs"
 
 class Administrador extends Component {
   state = {
-    partidas: [],
+    partidas: [
+      { id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" },
+      { id: 2, nombre: "Partida 2", descripcion: "Descripción de la partida 2" },
+      { id: 3, nombre: "Partida 3", descripcion: "Descripción de la partida 3" }
+    ],
     showAlert: false,
     alertText: "",
     showDeleteModal: false,
@@ -158,17 +162,17 @@ class Administrador extends Component {
               <tbody>
                 {partidas.length > 0 ? (
                   partidas.map((partida) => (
-                    <tr key={partida.id_partida}>
-                      <td>{partida.id_partida}</td>
-                      <td>{partida.nombrePartida}</td>
+                    <tr key={partida.id}>
+                      <td>{partida.id}</td>
+                      <td>{partida.nombre}</td>
                       <td className="AlignCenter">
-                        <Link to={`/Proyecto/verPartida/${partida.id_partida}`} className="CustomLink">
+                        <Link to={`/Proyecto/verPartida/${partida.id}`} className="CustomLink">
                           <Button variant="success" className="ButtonView">
                             <span className="material-icons ButtonIcon">visibility</span>
                             Ver partida
                           </Button>
                         </Link>
-                        <Link to={`/Proyecto/editar/${partida.id_partida}`} className="CustomLink">
+                        <Link to={`/Proyecto/editar/${partida.id}`} className="CustomLink">
                         <Button variant="warning" className="ButtonEdit">
                           <span className="material-icons ButtonIcon">edit</span>
                           Editar
@@ -177,12 +181,12 @@ class Administrador extends Component {
                         <Button
                           variant="danger"
                           className="ButtonDelete"
-                          onClick={() => this.handleDeleteModalShow(partida.id_partida)}
+                          onClick={() => this.handleDeleteModalShow(partida.id)}
                         >
                           <span className="material-icons ButtonIcon">delete</span>
                           Eliminar
                         </Button>
-                        <Link to={`/Proyecto/probarPartida/${partida.id_partida}`} className="CustomLink">
+                        <Link to={`/Proyecto/${partida.id_juego}`} className="CustomLink">
                           <Button variant="success" className="ButtonProbar">
                             <span className="material-icons ButtonIcon">tab</span>
                             Probar partida

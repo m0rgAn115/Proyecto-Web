@@ -3,9 +3,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 
-const ProbarAudio = () => {
-  const { audioId } = useParams();
-  const [audioData, setAudioData] = useState(null);
+const Juego1 = () => {
+  const { partidaId } = useParams();
+  const [partidaData, setPartidaData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [transcripcion, setTranscripcion] = useState("Aquí se mostrará la transcripción del audio.");
@@ -49,12 +49,12 @@ const ProbarAudio = () => {
     };
 
   useEffect(() => {
-    if (audioId) {
+    if (partidaId) {
       setLoading(true);
       axios
-        .get(`http://localhost:9999/audios/${audioId}`)
+        .get(`http://localhost:9999/audios/${partidaId}`)
         .then((response) => {
-          setAudioData(response.data);
+          setPartidaData(response.data);
           setLoading(false);
         })
         .catch((err) => {
@@ -63,7 +63,7 @@ const ProbarAudio = () => {
           setLoading(false);
         });
     }
-  }, [audioId]);
+  }, [partidaId]);
 
   useEffect(() => {
     loadModel()
@@ -126,30 +126,30 @@ const ProbarAudio = () => {
             <Spinner animation="border" variant="primary" />
           </div>
         ) : (
-          audioData && (
+          partidaData && (
             <div className="Contener_formulario">
               <Form className="crear-audio-form-Crear">
                 <div className="upload-area-Crear">
                   <Form.Label htmlFor="fileInput" className="upload-label-Crear">
-                    {audioData.archivoMultimedia
-                      ? `Archivo actual: ${audioData.archivoMultimedia}`
+                    {partidaData.archivoMultimedia
+                      ? `Archivo actual: ${partidaData.archivoMultimedia}`
                       : "No hay archivo de audio"}
                   </Form.Label>
                 </div>
 
                 <Form.Group controlId="formAudio" className="input-group-Crear">
                   <Form.Label>ID del Audio:</Form.Label>
-                  <Form.Control type="text" value={audioData.id_audio} readOnly />
+                  <Form.Control type="text" value={partidaData.id} readOnly />
                 </Form.Group>
 
                 <Form.Group controlId="formNombre" className="input-group-Crear">
                   <Form.Label>Nombre del Audio:</Form.Label>
-                  <Form.Control type="text" value={audioData.nombreAudio} readOnly />
+                  <Form.Control type="text" value={partidaData.nombre} readOnly />
                 </Form.Group>
 
                 <Form.Group controlId="formAudioFile" className="input-group-Crear">
                   <Form.Label>Archivo de Audio:</Form.Label>
-                  <Form.Control type="text" value={audioData.archivoMultimedia} readOnly />
+                  <Form.Control type="text" value={partidaData.archivoMultimedia} readOnly />
                 </Form.Group>
                   <div className="buttons-crear">
                     <Button
@@ -203,4 +203,4 @@ const ProbarAudio = () => {
   );
 };
 
-export default ProbarAudio;
+export default Juego1;
