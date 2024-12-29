@@ -39,8 +39,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-//CRUD
-
 // Obtener partidas
 app.get('/partidas', async (req, res) => {
   try {
@@ -67,7 +65,7 @@ app.get('/juegos', async (req, res) => {
   }
 });
 
-// Obtener un juego específico
+// Obtener un juego
 app.get('/juegos/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -87,6 +85,7 @@ app.get('/juegos/:id', async (req, res) => {
   }
 });
 
+//CRUD
 //CREAR PARTIDA
 app.post('/partidas', async (req, res) => {
   const { nombre, descripcion, id, usuario } = req.body;
@@ -112,7 +111,6 @@ app.post('/partidas', async (req, res) => {
     res.status(500).json({error: 'Hubo un problema al crear la partida. Inténtalo de nuevo.' });
   }
 });
-
 
 //VER PARTIDA
 app.get('/partidas/:id', async (req, res) => {
@@ -157,7 +155,6 @@ app.put('/partidas/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar la partida' });
   }
 });
-
 
 // ELIMINAR PARTIDA
 app.delete('/partidas/:id', async (req, res) => {
