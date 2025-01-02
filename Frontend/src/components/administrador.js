@@ -8,11 +8,7 @@ import * as tf from "@tensorflow/tfjs"
 
 class Administrador extends Component {
   state = {
-    partidas: [
-      { id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" },
-      { id: 2, nombre: "Partida 2", descripcion: "Descripción de la partida 2" },
-      { id: 3, nombre: "Partida 3", descripcion: "Descripción de la partida 3" }
-    ],
+    partidas: [],
     showAlert: false,
     alertText: "",
     showDeleteModal: false,
@@ -187,7 +183,7 @@ class Administrador extends Component {
                           <span className="material-icons ButtonIcon">delete</span>
                           Eliminar
                         </Button>
-                        <Link to={`/Proyecto/${partida.id_juego}`} className="CustomLink">
+                        <Link to={`/Proyecto/Juegos/${partida.id_juego}/${partida.id}`} className="CustomLink">
                           <Button variant="success" className="ButtonProbar">
                             <span className="material-icons ButtonIcon">tab</span>
                             Probar partida
@@ -206,10 +202,6 @@ class Administrador extends Component {
               </tbody>
             </Table>
           )}
-
-          <button class="bg-red-500" onClick={this.recognizeCommands}>
-            Command
-          </button>
 
           <Modal show={showDeleteModal} onHide={this.handleDeleteCancel}>
             <Modal.Header closeButton>

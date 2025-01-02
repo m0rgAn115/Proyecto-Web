@@ -33,6 +33,7 @@ class Login extends React.Component {
         if (data.status === "yes") {
 
           sessionStorage.setItem('id_usuario', data.id);
+          sessionStorage.setItem('tipo_usuario', data.tipo);
           
           this.setState(
             { 
