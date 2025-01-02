@@ -8,11 +8,15 @@ import * as tf from "@tensorflow/tfjs"
 
 class Administrador extends Component {
   state = {
-    audios: [],
+    partidas: [
+      { id: 1, nombre: "Partida 1", descripcion: "Descripción de la partida 1" },
+      { id: 2, nombre: "Partida 2", descripcion: "Descripción de la partida 2" },
+      { id: 3, nombre: "Partida 3", descripcion: "Descripción de la partida 3" }
+    ],
     showAlert: false,
     alertText: "",
     showDeleteModal: false,
-    audioToDelete: null,
+    partidaToDelete: null,
     isLoading: false,
     model: null,
     action: null,
@@ -20,20 +24,20 @@ class Administrador extends Component {
   };
 
   componentDidMount() {
-    this.fetchAudios();
+    this.fetchPartidas();
     this.loadModel()
   }
 
-  fetchAudios = () => {
+  fetchPartidas = () => {
     this.setState({ isLoading: true });
     axios
-      .get("http://localhost:9999/audios")
+      .get("http://localhost:9999/partidas")
       .then((response) => {
-        this.setState({ audios: response.data, isLoading: false });
+        this.setState({ partidas: response.data, isLoading: false });
         this.showAlertMessage("Datos cargados correctamente.");
       })
       .catch((error) => {
-        console.error("Error al cargar audios:", error);
+        console.error("Error al cargar las partidas:", error);
         this.setState({
           showAlert: true,
           alertText: "Error en la obtención de datos.",
@@ -78,46 +82,47 @@ class Administrador extends Component {
 
   handleDeleteModalShow = (id) => {
     this.setState({
-      audioToDelete: id,
+      partidaToDelete: id,
       showDeleteModal: true,
     });
   };
 
   handleDelete = async () => {
-    const { audioToDelete } = this.state;
-    if (!audioToDelete) return;
+    const { partidaToDelete } = this.state;
+    if (!partidaToDelete) return;
 
     try {
       const response = await axios.delete(
-        `http://localhost:9999/audios/${audioToDelete}`
+        `http://localhost:9999/partidas/${partidaToDelete}`
       );
-      this.fetchAudios(); 
-      this.setState({ showDeleteModal: false, audioToDelete: null });
-      this.showAlertMessage("Audio eliminado correctamente.");
+      this.fetchPartidas(); 
+      this.setState({ showDeleteModal: false, partidaToDelete: null });
+      this.showAlertMessage("Partida eliminada correctamente.");
     } catch (error) {
-      console.error("Error al eliminar el audio:", error.response || error);
-      this.showAlertMessage("Error al eliminar el audio.");
+      console.error("Error al eliminar la partida:", error.response || error);
+      this.showAlertMessage("Error al eliminar la partida.");
     }
   };
 
   handleDeleteCancel = () => {
     this.setState({
       showDeleteModal: false,
-      audioToDelete: null,
+      partidaToDelete: null,
     });
   };
 
 
+
   render() {
     const {
-      audios,
+      partidas,
       showAlert,
       alertText,
       showDeleteModal,
       isLoading,
       model,
       action,
-      audioToDelete,
+      partidaToDelete,
       labels
     } = this.state;
 
@@ -138,9 +143,9 @@ class Administrador extends Component {
           {showAlert && <Alert variant="success">{alertText}</Alert>}
 
           <Button variant="success" style={{ marginBottom: "12px", width: "100px" }}>
-            <Link to="/Proyecto/CrearAudio" className="CustomLink">
+            <Link to="/Proyecto/CrearPartida" className="CustomLink">
               <span className="material-icons ButtonIcon">add</span>
-              Agregar Ejercicio
+              Agregar Partida
             </Link>
           </Button>
 
@@ -156,19 +161,19 @@ class Administrador extends Component {
                 </tr>
               </thead>
               <tbody>
-                {audios.length > 0 ? (
-                  audios.map((audio) => (
-                    <tr key={audio.id_audio}>
-                      <td>{audio.id_audio}</td>
-                      <td>{audio.nombreAudio}</td>
+                {partidas.length > 0 ? (
+                  partidas.map((partida) => (
+                    <tr key={partida.id}>
+                      <td>{partida.id}</td>
+                      <td>{partida.nombre}</td>
                       <td className="AlignCenter">
-                        <Link to={`/Proyecto/verAudio/${audio.id_audio}`} className="CustomLink">
+                        <Link to={`/Proyecto/verPartida/${partida.id}`} className="CustomLink">
                           <Button variant="success" className="ButtonView">
                             <span className="material-icons ButtonIcon">visibility</span>
-                            Ver audio
+                            Ver partida
                           </Button>
                         </Link>
-                        <Link to={`/Proyecto/editar/${audio.id_audio}`} className="CustomLink">
+                        <Link to={`/Proyecto/editar/${partida.id}`} className="CustomLink">
                         <Button variant="warning" className="ButtonEdit">
                           <span className="material-icons ButtonIcon">edit</span>
                           Editar
@@ -177,15 +182,15 @@ class Administrador extends Component {
                         <Button
                           variant="danger"
                           className="ButtonDelete"
-                          onClick={() => this.handleDeleteModalShow(audio.id_audio)}
+                          onClick={() => this.handleDeleteModalShow(partida.id)}
                         >
                           <span className="material-icons ButtonIcon">delete</span>
                           Eliminar
                         </Button>
-                        <Link to={`/Proyecto/probarAudio/${audio.id_audio}`} className="CustomLink">
+                        <Link to={`/Proyecto/${partida.id_juego}`} className="CustomLink">
                           <Button variant="success" className="ButtonProbar">
                             <span className="material-icons ButtonIcon">tab</span>
-                            Probar audio
+                            Probar partida
                           </Button>
                         </Link>
                       </td>
@@ -194,7 +199,7 @@ class Administrador extends Component {
                 ) : (
                   <tr>
                     <td colSpan="3" align="center">
-                      No hay audios disponibles
+                      No hay partidas disponibles
                     </td>
                   </tr>
                 )}
@@ -211,7 +216,7 @@ class Administrador extends Component {
               <Modal.Title>Confirmar Eliminación</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              ¿Estás seguro de que quieres eliminar este audio?
+              ¿Estás seguro de que quieres eliminar esta partida?
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={this.handleDeleteCancel}>

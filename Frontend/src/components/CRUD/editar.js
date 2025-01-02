@@ -1,198 +1,195 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom"; 
 import axios from "axios";
-import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 
-const EditarAudio = () => {
-  const { audioId } = useParams();
-  const history = useHistory();
-  const [audioData, setAudioData] = useState(null);
-  const [nombreAudio, setNombreAudio] = useState("");
-  const [archivoMultimedia, setArchivoMultimedia] = useState(null);
+const EditarPartida = () => {
+  const { partidaId } = useParams(); 
+  const [partidaData, setPartidaData] = useState(null);
+  const [juegoData, setJuegoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [success, setSuccess] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
-    if (audioId) {
-     // console.log("audioId recibido:", audioId); 
-      setLoading(true);
+    if (partidaId) {
+      setLoading(true); 
       axios
-        .get(`http://localhost:9999/audios/${audioId}`)
+        .get(`http://localhost:9999/partidas/${partidaId}`)
         .then((response) => {
-          const { nombreAudio, archivoMultimedia } = response.data;
-          setAudioData(response.data);
-          setNombreAudio(nombreAudio || "");
-          setArchivoMultimedia(archivoMultimedia || null);
+          setPartidaData(response.data);
+          setLoading(false); 
+        })
+        .catch((err) => {
+          console.error("Error al obtener los datos de la partida", err);
+          setError("Error al obtener los datos de la partida");
+          setLoading(false); 
+        });
+    }
+  }, [partidaId]); 
+
+  useEffect(() => {
+    if (partidaData?.id_juego) {
+      setLoading(true);
+      axios.get(`http://localhost:9999/juegos/${partidaData.id_juego}`)
+        .then((response) => {
+          setJuegoData(response.data);
           setLoading(false);
         })
         .catch((err) => {
-          console.error("Error al obtener los datos del audio", err);
-          setError("Error al obtener los datos del audio.");
+          console.error("Error al obtener los datos del juego", err);
+          setError("Error al obtener los datos del juego");
           setLoading(false);
         });
     }
-  }, [audioId]);
+  }, [partidaData?.id_juego]);  
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    if (!nombreAudio) {
-      setError("El nombre del audio es obligatorio.");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+  
+    if (!partidaData.nombre || !partidaData.descripcion) {
+      setError("Por favor, complete todos los campos.");
       return;
     }
-
-    setIsSubmitting(true); 
-
-    // Crear el FormData
-    const formData = new FormData();
-    formData.append("nombreAudio", nombreAudio);
-
-    if (archivoMultimedia) {
-      formData.append("archivoMultimedia", archivoMultimedia);
-    }
-
-    console.log("FormData a enviar:");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
-
-    // Enviar la solicitud
+  
     axios
-      .put(`http://localhost:9999/audios/${audioId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      .put(`http://localhost:9999/partidas/${partidaId}`, {
+        nombre: partidaData.nombre,
+        descripcion: partidaData.descripcion,
+        id_juego: partidaData.id_juego,
+        puntuacion: partidaData.puntuacion,
       })
-      .then(() => {
-        setSuccessMessage("Los cambios se han guardado correctamente.");
+      .then((response) => {
+        setSuccess("La partida se actualizó correctamente.");
         setTimeout(() => {
-          history.push("/Proyecto/administrador");
+          history.push(`/Proyecto/administrador`);
         }, 2000);
       })
       .catch((err) => {
-        console.error("Error al guardar los cambios", err);
-        if (err.response) {
-          console.error("Detalles del error:", err.response.data);
-          setError(`Error al guardar los cambios: ${err.response.data.error || 'Desconocido'}`);
-        } else {
-          setError("Error al conectar con el servidor.");
-        }
-      })
-      .finally(() => {
-        setIsSubmitting(false); // Habilitar el botón de nuevo
+        console.error("Error al actualizar la partida", err);
+        setError("Hubo un problema al actualizar la partida. Inténtalo de nuevo.");
       });
   };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-
-    if (!file) {
-      setError("Por favor selecciona un archivo.");
-      return;
-    }
-
-    // Verifica si el archivo es de tipo audio
-    const validTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp3"];
-    if (!validTypes.includes(file.type)) {
-      setError("Por favor selecciona un archivo de audio válido (MP3, WAV, OGG).");
-      setTimeout(() => setError(null), 3000);
-      setArchivoMultimedia(null);
-      return;
-    }
-
-    // tamaño del archivo, esto lo podemos modificar si quieren xd
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      setError("El archivo es demasiado grande. El tamaño máximo es 10MB.");
-      setArchivoMultimedia(null); 
-      return;
-    }
-
-    console.log("Archivo seleccionado:", file);
-    setArchivoMultimedia(file);
-    setError(null); 
-  };
-
-  if (loading) {
-    return (
-      <div className="spinner-container">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-  }
+  
 
   return (
-    <div className="page-background-Crear">
-      <Container className="crear-audio-container-Crear">
-        <div className="form-header-Crear">
-          <h2>Editar Audio</h2>
-          <p>Modifica los detalles del archivo de audio.</p>
+    <div className="bg-[#0B294C] min-h-screen flex justify-center items-center p-5">
+      <div className="max-w-[800px] w-full bg-white p-6 rounded-lg shadow-lg">
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-bold text-gray-800">Editar Partida</h2>
+          <p className="text-gray-600">Modifica el nombre o la descripción de la partida.</p>
         </div>
 
-        {successMessage && (
-          <Alert variant="success" className="mb-3">
-            {successMessage}
-          </Alert>
-        )}
-
         {error && (
-          <Alert variant="danger" className="mb-3">
+          <div className="bg-red-100 text-red-600 text-center border border-red-500 rounded-md p-3 mb-5">
             {error}
-          </Alert>
+          </div>
         )}
 
-        <Form className="crear-audio-form-Crear" onSubmit={handleSubmit}>
-          <Form.Group controlId="formAudio" className="input-group-Crear">
-            <Form.Label>ID del Audio:</Form.Label>
-            <Form.Control type="text" value={audioData?.id_audio} readOnly />
-          </Form.Group>
-
-          <Form.Group controlId="formNombre" className="input-group-Crear">
-            <Form.Label>Nombre del Audio:</Form.Label>
-            <Form.Control
-              type="text"
-              value={nombreAudio}
-              onChange={(e) => setNombreAudio(e.target.value)}
-            />
-          </Form.Group>
-
-          <Form.Group controlId="formAudioFile" className="input-group-Crear">
-            <Form.Label>Archivo de Audio:</Form.Label>
-            <Form.Control
-              type="file"
-              accept="audio/*"
-              onChange={handleFileChange}
-            />
-            {archivoMultimedia ? (
-              <Form.Text className="text-muted">
-                Archivo seleccionado: {archivoMultimedia.name}
-              </Form.Text>
-            ) : (
-              <Form.Text className="text-warning">
-                No se ha seleccionado un archivo nuevo.
-              </Form.Text>
-            )}
-            {audioData?.archivoMultimedia && (
-              <Form.Text className="text-muted">
-                Archivo actual: {audioData.archivoMultimedia}
-              </Form.Text>
-            )}
-          </Form.Group>
-
-          <div className="form-buttons-Crear">
-            <Button
-              variant="primary"
-              type="submit"
-              className="submit-button-Crear"
-              disabled={isSubmitting}  
-            >
-              {isSubmitting ? "Guardando..." : "Guardar"}
-            </Button>
+        {success && (
+          <div className="bg-green-100 text-green-600 border border-green-500 rounded-md p-3 mb-5">
+            {success}
           </div>
-        </Form>
-      </Container>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center">
+            <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-500"></div>
+          </div>
+        ) : (
+          partidaData && (
+              <div className="grid grid-cols-2 gap-5">
+              {/* Lado izquierdo */}
+              <div className="col-span-1">
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      ID de la Partida:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.id || ""}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Nombre de la Partida:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.nombre || ""}
+                      onChange={(e) => setPartidaData({...partidaData, nombre: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Descripción:
+                    </label>
+                    <textarea
+                      value={partidaData.descripcion || ""}
+                      onChange={(e) => setPartidaData({...partidaData, descripcion: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+                </form>
+              </div>
+
+              {/* Lado derecho */}
+              <div className="col-span-1">
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Juego Seleccionado:
+                    </label>
+                    <input
+                      type="text"
+                      value={juegoData.nombre || "N/A"}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-left text-gray-700 font-medium">
+                      Puntuación:
+                    </label>
+                    <input
+                      type="text"
+                      value={partidaData.puntuacion || "Sin puntuación"}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                    />
+                  </div>
+                </form>
+              </div>
+
+              <div className="col-span-2 flex justify-center gap-4 mt-5">
+                <button
+                  type="button"
+                  onClick={() => window.history.back()}
+                  className="bg-red-600 hover:bg-red-800 text-white py-2 px-4 rounded-md">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="bg-blue-800 hover:bg-blue-1000 text-white py-2 px-4 rounded-md">
+                  Guardar Cambios
+                </button>
+              </div>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 };
 
-export default EditarAudio;
+export default EditarPartida;
