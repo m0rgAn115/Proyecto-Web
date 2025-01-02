@@ -135,10 +135,17 @@ app.put('/partidas/:id', async (req, res) => {
   try {
     const partida = await Partida.findOne({ where: { id: id } });
 
-    partida.nombre = nombre;
-    partida.descripcion = descripcion;
-    partida.id_juego = id_juego;
-    partida.puntuacion = puntuacion;
+    if(nombre != undefined)
+      partida.nombre = nombre;
+
+    if(descripcion != undefined)
+      partida.descripcion = descripcion;
+
+    if(id_juego != undefined )
+      partida.id_juego = id_juego;
+
+    if(puntuacion != undefined)
+      partida.puntuacion = puntuacion;
 
     await partida.save();
 

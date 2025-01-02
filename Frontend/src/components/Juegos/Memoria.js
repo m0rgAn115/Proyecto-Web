@@ -5,7 +5,8 @@ import axios from "axios";
 import * as tf from "@tensorflow/tfjs"
 import Tarjeta from "./Memoria-Comps/tarjeta";
 import { getRandomInteger } from "@tensorflow-models/speech-commands/dist/generic_utils";
-import { Redirect } from "react-router-dom/cjs/react-router-dom";
+import { Redirect } from "react-router-dom";
+
 // const speech = speechCommands.create('BROWSER_FFT');
 // import * as speech from "@tensorflow-models/speech-commands"
 
@@ -81,11 +82,26 @@ class Memoria extends Component {
     comandosUsuario: [],
     comandoActualUsuario: null,
     esCorrecta: undefined,
-    puntuacion: 0
+    puntuacion: 0,
+    idUsuario: sessionStorage.getItem('id_usuario'),
+    tipoUsuario: sessionStorage.getItem('tipo_usuario'),
+    IdPartida: undefined, 
+    terminado: false
   };
 
   componentDidMount() {
     this.loadModel()
+
+    const pathname = window.location.pathname;
+    const parametros = pathname.split('/');  // Dividir la ruta por "/"
+    
+    const parametro1 = parametros[parametros.length - 2];  // El parámetro "2"
+    const parametro2 = parametros[parametros.length - 1];  // El parámetro "1"
+  
+    this.setState({
+      IdPartida: parametro2
+    })
+
   }
 
 
@@ -94,15 +110,22 @@ class Memoria extends Component {
     const recognizer = speechCommands.create('BROWSER_FFT');
     console.log("Model Loaded")
     await recognizer.ensureModelLoaded()
-    console.log(recognizer.wordLabels())
     this.setState({
       model: recognizer,
       labels: recognizer.wordLabels()
     })
   }
 
+  
+
   recognizeCommands = async () => {
-    const { secuencia } = this.state;
+    const { secuencia, comandosUsuario } = this.state;
+
+    if (comandosUsuario.length > 0 ){
+      this.setState({comandosUsuario: []})
+      this.state.model.stopListening();
+    }
+
     let lastCommand = null;
     let lastTimestamp = Date.now();
   
@@ -124,9 +147,6 @@ class Memoria extends Component {
           lastTimestamp = currentTime;
           comandos.push(comando);
   
-          console.log("Comando detectado:", comando);
-          console.log("Comandos lista:", comandos);
-
           this.setState(prev => ({
             comandosUsuario: comandos
           }))
@@ -169,7 +189,6 @@ class Memoria extends Component {
         }
 
         
-        console.log("Secuencia ronda: ",rondaActual,nuevaSecuencia);
 
         this.setState(
           {
@@ -178,7 +197,6 @@ class Memoria extends Component {
           },
           () => {
             // Este callback se ejecuta después de que el estado se ha actualizado
-            console.log(`Secuencia completa: ${this.state.secuencia}`);
             this.intervalo = setInterval(this.imprimirValor, 2000);
             setTimeout(this.validarRespuesta,5000)
           }
@@ -201,7 +219,6 @@ class Memoria extends Component {
         }
 
         
-        console.log("Secuencia ronda: ",rondaActual,nuevaSecuencia);
 
         this.setState(
           {
@@ -210,7 +227,6 @@ class Memoria extends Component {
           },
           () => {
             // Este callback se ejecuta después de que el estado se ha actualizado
-            console.log(`Secuencia completa: ${this.state.secuencia}`);
             this.intervalo = setInterval(this.imprimirValor, 2000);
             setTimeout(this.validarRespuesta,5000)
           }
@@ -233,7 +249,6 @@ class Memoria extends Component {
         }
 
         
-        console.log("Secuencia ronda: ",rondaActual,nuevaSecuencia);
 
         this.setState(
           {
@@ -242,7 +257,6 @@ class Memoria extends Component {
           },
           () => {
             // Este callback se ejecuta después de que el estado se ha actualizado
-            console.log(`Secuencia completa: ${this.state.secuencia}`);
             this.intervalo = setInterval(this.imprimirValor, 1000);
             setTimeout(this.validarRespuesta,5000)
           }
@@ -254,7 +268,6 @@ class Memoria extends Component {
 
       case "extremo": {
         const instrucciones = labels.slice(2,19);
-        console.log("longitud en extemo: ", instrucciones.length);
         
 
         let nuevaSecuencia = []; // Variable temporal para construir la secuencia
@@ -267,7 +280,6 @@ class Memoria extends Component {
         }
 
         
-        console.log("Secuencia ronda: ",rondaActual,nuevaSecuencia);
 
         this.setState(
           {
@@ -276,7 +288,6 @@ class Memoria extends Component {
           },
           () => {
             // Este callback se ejecuta después de que el estado se ha actualizado
-            console.log(`Secuencia completa: ${this.state.secuencia}`);
             this.intervalo = setInterval(this.imprimirValor, 500);
             setTimeout(this.validarRespuesta,5000)
           }
@@ -299,16 +310,11 @@ class Memoria extends Component {
   imprimirValor = () => {
     const { secuencia, indiceActual, coloresTarjetas } = this.state;
 
-    console.log("colorActual", coloresTarjetas);
-    
-
 
     if (indiceActual < secuencia.length) {
-      console.log(secuencia[indiceActual]); // Imprime el valor actual
       this.setState({ indiceActual: indiceActual + 1, comandoActual:  secuencia[indiceActual], colorActual: coloresTarjetas[indiceActual]  }); // Actualiza al siguiente índice
     } else {
       clearInterval(this.intervalo); // Detiene el intervalo cuando se recorren todos los valores
-      console.log("Se terminó de imprimir la secuencia.");
       this.setState({comandoActual: undefined, indiceActual: 0, coloresTarjetas: undefined, jugadorRespondiendo: true})
 
     }
@@ -317,18 +323,8 @@ class Memoria extends Component {
 
   validarRespuesta = (comandos, secuencia) => {
     const correcto = comandos.every((element, index) => element === secuencia[index])
-    console.log("Los arreglos son iguales? :", correcto);
     this.setState({esCorrecta: correcto})
 
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // if (this.state.comandosUsuario.length === this.state.secuencia.length ) {
-
-    //   const correcto = arr1.every((element, index) => element === arr2[index])
-    //   console.log("Los arreglos son iguales? :", correcto);
-      
-    // }
   }
 
   componentWillUnmount() {
@@ -346,14 +342,37 @@ class Memoria extends Component {
     })
   }
 
+  redirigir = (ruta) => {
+    const rutaActual = window.location.pathname; // Obtiene la ruta actual
+    const partesRuta = rutaActual.split('/')[0]; // Divide la ruta en partes usando "/"
+  
+  
+    // Redirige a la nueva ruta manteniendo el dominio actual
+    window.location.href = partesRuta + ruta;
+  };
+  
+  
+
   terminarJuego = () => {
-    const { rondaActual, cantidadRondas, dificultad } = this.state;
+    const { rondaActual, cantidadRondas, dificultad, tipoUsuario, IdPartida, puntuacion } = this.state;
+    
+    if (IdPartida) {
+      axios
+      .put(`http://localhost:9999/partidas/${IdPartida}`, {
+        puntuacion: puntuacion,
+      })
+      .then(() => {
+        this.setState({
+          terminado: true
+        })
+      })
+      .catch((err) => {
+        console.error("Error al actualizar la partida", err);
+      });
+    }else {
+      console.error("No se encuentro un id de partida")
+    }
 
-    const dificultad_formateada = dificultad.toLowerCase()
-
-    const puntos_ronda = puntos_por_ronda[dificultad_formateada]
-
-    return <Redirect to={`/`} />;
   }
 
   iniciarRonda = () => {
@@ -372,7 +391,6 @@ class Memoria extends Component {
 
         }),
         () => {
-          console.log("Nueva ronda:", this.state.rondaActual);
           this.generarSecuencia();
           this.state.puntuacion = puntos_ronda*rondaActual
         }
@@ -382,19 +400,34 @@ class Memoria extends Component {
     }
   };
 
+  onRegresar = () => {
+    this.setState({
+      terminado: true
+    })
+  }
 
   render() {
     const {
       rondaActual,
       comandosUsuario,
-      puntuacion
+      puntuacion,
+      terminado,
+      tipoUsuario
     } = this.state;
+
+    if (terminado) {
+      return <Redirect to={`/Proyecto/${tipoUsuario}`} />;
+    }
 
     return (
       <div className="flex flex-col h-screen">
+        
         {/* Barra superior */}
         <div className="flex flex-row justify-between px-5 items-center bg-blue-800 text-white h-10 leading-none">
-          <button className="m-0 font-bold hover:scale-[1.03] z-30">Regresar</button>
+        <button className="m-0 font-bold hover:scale-[1.03] z-30 flex items-center" onClick={() => this.onRegresar()}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 text-white transform scale-x-[-1]" width={12} height={24} viewBox="0 0 12 24"><path fill="currentColor" fillRule="evenodd" d="M10.157 12.711L4.5 18.368l-1.414-1.414l4.95-4.95l-4.95-4.95L4.5 5.64l5.657 5.657a1 1 0 0 1 0 1.414"></path></svg>
+          Regresar
+        </button>
           <div>
             <p className="text-md m-0 font-bold">Juego de Memoria!</p>
             <p className="text-md m-0 font-bold text-md">Puntuacion: {puntuacion}</p>
@@ -467,7 +500,6 @@ class Memoria extends Component {
                 Siguiente ronda!
               </button>
               </>
-
 
             ) : (
               <>

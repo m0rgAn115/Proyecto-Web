@@ -23,17 +23,20 @@ const App = () => {
         <Route exact path="/Proyecto/editar/:partidaId" component={EditarPartida} />
         <Route exact path="/Proyecto/verPartida/:partidaId" component={VerPartida} />
         <Route exact path="/Proyecto/CrearPartida" component={CrearPartida} />
-        <Route exact path="/Proyecto/:idJuego"
+        <Route
+          exact
+          path="/Proyecto/Juegos/:idJuego/:idPartida"
           render={({ match }) => {
-            const { idJuego } = match.params; // Obtén el id_juego desde la URL
+            const { idJuego, idPartida } = match.params; // Extrae idJuego y id desde la URL
+
             if (idJuego === "1") {
-              return <Juego1 />;
+              return <Juego1 id={idPartida} />;
             } else if (idJuego === "2") {
-              return <Memoria />;
+              return <Memoria id={idPartida} />;
             } else if (idJuego === "3") {
-              return <Juego3 />;
+              return <Juego3 id={idPartida} />;
             } else {
-              return <h2>Juego no disponible</h2>; 
+              return <h2>Juego no disponible</h2>;
             }
           }}
         />
