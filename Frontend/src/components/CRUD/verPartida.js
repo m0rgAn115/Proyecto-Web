@@ -17,6 +17,8 @@ const VerPartida = () => {
         .get(`http://localhost:9999/partidas/${partidaId}`)
         .then((response) => {
           setPartidaData(response.data);
+          console.log("DATA: ", response.data);
+          
           setLoading(false);
         })
         .catch((err) => {
@@ -124,7 +126,7 @@ const VerPartida = () => {
                   </label>
                   <input
                     type="text"
-                    value={partidaData.puntuacion || "Sin puntuación"}
+                    value={partidaData.puntuacion!=undefined ? partidaData.puntuacion : "Sin puntuación"}
                     readOnly
                     className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
                   />

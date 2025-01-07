@@ -12,6 +12,7 @@ import Memoria from "./components/Juegos/Memoria";
 import Juego1 from "./components/Juegos/Juego1"; 
 import Juego3 from "./components/Juegos/Juego3"; 
 import './index.css';
+import { Trivia } from "./components/Juegos/Trivia";
 
 const App = () => {
   return (
@@ -23,17 +24,20 @@ const App = () => {
         <Route exact path="/Proyecto/editar/:partidaId" component={EditarPartida} />
         <Route exact path="/Proyecto/verPartida/:partidaId" component={VerPartida} />
         <Route exact path="/Proyecto/CrearPartida" component={CrearPartida} />
-        <Route exact path="/Proyecto/:idJuego"
+        <Route
+          exact
+          path="/Proyecto/Juegos/:idJuego/:idPartida"
           render={({ match }) => {
-            const { idJuego } = match.params; // Obtén el id_juego desde la URL
+            const { idJuego, idPartida } = match.params; // Extrae idJuego y id desde la URL
+
             if (idJuego === "1") {
-              return <Juego1 />;
+              return <Trivia id={idPartida} />;
             } else if (idJuego === "2") {
-              return <Memoria />;
+              return <Memoria id={idPartida} />;
             } else if (idJuego === "3") {
-              return <Juego3 />;
+              return <Juego3 id={idPartida} />;
             } else {
-              return <h2>Juego no disponible</h2>; 
+              return <h2>Juego no disponible</h2>;
             }
           }}
         />
