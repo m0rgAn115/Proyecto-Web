@@ -138,6 +138,18 @@ async function crearJuego(nombre, descripcion) {
   console.log(creado ? `Juego "${nombre}" creado` : `Juego "${nombre}" ya existe`);
 }
 
+async function partidasPrecargadas(nombre, descripcion, id_usuario, id_juego) {
+  try {
+    const [partida, creada] = await Partida.findOrCreate({
+      where: { nombre, id_usuario, id_juego },
+      defaults: { descripcion }
+    });
+    console.log(creada ? `Partida "${nombre}" creada` : `Partida "${nombre}" ya existe`);
+  } catch (error) {
+    console.error("Error al crear la partida:", error.message);
+  }
+}
+
 async function run() {
   try {
     await syncDatabase();
@@ -158,9 +170,15 @@ async function run() {
     console.log('Detalles del Usuario Admin:', administradorUser.toJSON());
 
     // Crear juegos
-    await crearJuego('Trivia', 'Esto es prueba de descripcion');
-    await crearJuego('Memoria', 'Esto es prueba igual');
-    await crearJuego('Juego3', 'Esto es prueba tambien');
+    await crearJuego('Trivia', 'Responde a la trivia mediante los comandos UP, DOWN, LEFT y RIGHT que se encuentren en la respuesta que quieres marcar, veamos que tanto sabes');
+    await crearJuego('Memoria', 'No pierdas la atención en la secuencia de comandos, posteriormente repítelos tú y pon a prueba tu memoria.');
+    await crearJuego('Misterio', 'Si eres curioso y explorador, este es tu juego, investiga la sala de escape y gana en el menor tiempo posible');
+
+    // Partidas precargadas
+    await partidasPrecargadas('Partida 1', 'Partida precargada no. 1', '1', '1');
+    await partidasPrecargadas('Partida 2', 'Partida precargada no. 2', '1', '2');
+    await partidasPrecargadas('Partida 3', 'Partida precargada no. 3', '1', '3');
+
   } catch (error) {
     console.error('Error en la ejecución:', error);
   }
