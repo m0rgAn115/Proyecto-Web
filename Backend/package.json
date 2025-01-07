@@ -5,6 +5,7 @@
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "core-util-is": "^1.0.3",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "groq-sdk": "^0.9.1",
     "inherits": "^2.0.4",

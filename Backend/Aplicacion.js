@@ -4,8 +4,11 @@ const express = require('express');
 const app = express();
 const puerto = 9999;
 const Groq = require('groq-sdk');
+// Al inicio de tu archivo principal (ejemplo: Aplicacion.js)
+require('dotenv').config();
 
-const groq = new Groq({ apiKey: "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"});
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const MODELS = ["llama-3.3-70b-versatile","llama3-70b-8192"]
 
