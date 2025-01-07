@@ -12,6 +12,7 @@ import Memoria from "./components/Juegos/Memoria";
 import Juego1 from "./components/Juegos/Juego1"; 
 import Juego3 from "./components/Juegos/Juego3"; 
 import './index.css';
+import { Trivia } from "./components/Juegos/Trivia";
 
 const App = () => {
   return (
@@ -30,7 +31,7 @@ const App = () => {
             const { idJuego, idPartida } = match.params; // Extrae idJuego y id desde la URL
 
             if (idJuego === "1") {
-              return <Juego1 id={idPartida} />;
+              return <Trivia id={idPartida} />;
             } else if (idJuego === "2") {
               return <Memoria id={idPartida} />;
             } else if (idJuego === "3") {

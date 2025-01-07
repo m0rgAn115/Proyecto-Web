@@ -8,8 +8,8 @@ class Login extends React.Component {
     this.state = {
       condition: false,
       tipousuario: '',
-      usuario: '',
-      password: '',
+      usuario: "admin",
+      password: 1234,
       error: '',
       validado: false,
       showModal: false,
@@ -47,7 +47,7 @@ class Login extends React.Component {
             () => {
               setTimeout(() => {
                 this.setState({ showModal: false, condition: true });
-              }, 3000); // 3 segundos
+              }, 1); // 3 segundos
             }
           );
         } else {
