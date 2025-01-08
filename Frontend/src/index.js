@@ -13,6 +13,7 @@ import Juego1 from "./components/Juegos/Juego1";
 import Juego3 from "./components/Juegos/Juego3"; 
 import './index.css';
 import { Trivia } from "./components/Juegos/Trivia";
+import { Historia_Inmersiva } from "./components/Juegos/Historia_Inmersiva";
 
 const App = () => {
   return (
@@ -35,7 +36,7 @@ const App = () => {
             } else if (idJuego === "2") {
               return <Memoria id={idPartida} />;
             } else if (idJuego === "3") {
-              return <Juego3 id={idPartida} />;
+              return <Historia_Inmersiva id={idPartida} />;
             } else {
               return <h2>Juego no disponible</h2>;
             }
