@@ -134,7 +134,7 @@ const VerPartida = () => {
 
                 <div>
                   <label className="block text-left text-gray-700 font-medium">
-                    Duracion:
+                    Duracion (segundos):
                   </label>
                   <input
                     type="text"

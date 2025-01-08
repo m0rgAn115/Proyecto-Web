@@ -86,7 +86,10 @@ class Memoria extends Component {
     idUsuario: sessionStorage.getItem('id_usuario'),
     tipoUsuario: sessionStorage.getItem('tipo_usuario'),
     IdPartida: undefined, 
-    terminado: false
+    terminado: false,
+    nombre_partida: undefined,
+    hora_inicial: undefined,
+    regresar: false
   };
 
   componentDidMount() {
@@ -97,10 +100,17 @@ class Memoria extends Component {
     
     const parametro1 = parametros[parametros.length - 2];  // El parámetro "2"
     const parametro2 = parametros[parametros.length - 1];  // El parámetro "1"
+
+    
   
-    this.setState({
-      IdPartida: parametro2
-    })
+    this.setState(
+      {
+        IdPartida: parametro2
+      },
+      () => {
+        this.consultar_estado_partida();
+      }
+    );
 
   }
 
@@ -172,8 +182,6 @@ class Memoria extends Component {
     // a la dificultad y la cantidad de rondas actuales.
 
     const { dificultad, labels,rondaActual  } = this.state;
-
-   
 
     switch (dificultad) {
       case "facil": {
@@ -350,16 +358,70 @@ class Memoria extends Component {
     // Redirige a la nueva ruta manteniendo el dominio actual
     window.location.href = partesRuta + ruta;
   };
+
+  consultar_estado_partida = () => {
+    const { IdPartida } = this.state;
+
+
+    if (IdPartida) {
+      axios
+      .get(`http://localhost:9999/partidas/${IdPartida}`, {
+      })
+      .then((response) => {
+        console.log("data: ",response.data);
+        const puntuacion_respuesta = response.data.puntuacion
+        const nombre_partida_respuesta = response.data.nombre
+      
+        this.setState({
+          puntuacion: puntuacion_respuesta,
+          nombre_partida: nombre_partida_respuesta
+        })
+
+        if(puntuacion_respuesta != null || puntuacion_respuesta != undefined){
+          this.setState({
+            terminado: true
+          })
+        }
+      })
+      .catch((err) => {
+        console.error("Error al actualizar la partida", err);
+      });
+    }else {
+      console.error("No se encuentro un id de partida")
+    }
+  }
   
+
+  obtener_duracion_partida = (hora_inicio) => {
+    // Convierte las horas a objetos Date
+    const hora_fin = new Date().toLocaleTimeString("en-GB");
+
+    console.log("hora inicio: ", hora_inicio);
+    console.log("hora fin: ", hora_fin);
+    
+    const date1 = new Date(`1970-01-01T${hora_inicio}Z`);
+    const date2 = new Date(`1970-01-01T${hora_fin}Z`);
+
+    // Obtén la diferencia en milisegundos y conviértela a segundos
+    const differenceInSeconds = (date2 - date1) / 1000;
+
+    console.log("timepo: ", differenceInSeconds);
+    
+
+    return differenceInSeconds;
+  }
   
 
   terminarJuego = () => {
-    const { rondaActual, cantidadRondas, dificultad, tipoUsuario, IdPartida, puntuacion } = this.state;
+    const {  IdPartida, puntuacion, hora_inicial } = this.state;
+
+    const duracion = this.obtener_duracion_partida(hora_inicial)
     
     if (IdPartida) {
       axios
       .put(`http://localhost:9999/partidas/${IdPartida}`, {
         puntuacion: puntuacion,
+        duracion
       })
       .then(() => {
         this.setState({
@@ -382,6 +444,13 @@ class Memoria extends Component {
     const dificultad_formateada = dificultad.toLowerCase()
 
     const puntos_ronda = puntos_por_ronda[dificultad_formateada]
+
+    if(rondaActual == 0){
+      this.setState({
+        hora_inicial: new Date().toLocaleTimeString("en-GB")
+      })
+    }
+
 
     this.limpiarValores()
     if (rondaActual < cantidadRondas) {
@@ -406,17 +475,38 @@ class Memoria extends Component {
     })
   }
 
+  
+
   render() {
     const {
       rondaActual,
       comandosUsuario,
       puntuacion,
       terminado,
-      tipoUsuario
+      tipoUsuario,
+      nombre_partida,
+      regresar
     } = this.state;
 
+   
+    if(regresar)
+      return <Redirect to={`/Proyecto/${tipoUsuario}`} />
+    
     if (terminado) {
-      return <Redirect to={`/Proyecto/${tipoUsuario}`} />;
+      return (
+        <div className="h-screen w-full bg-slate-100 font-mono flex flex-col items-center justify-center ">
+          <h1 className="text-3xl font-bold " >Juego Terminado!</h1>
+          <h2 className="text-xl" >Nombre de la partida: <span className="font-bold"> { nombre_partida??"" } </span></h2>
+          <p className="text-xl"  >Puntuacion: <span className="font-bold" > { puntuacion } </span></p>
+
+          <button className="bg-blue-500 text-white mt-5 font-bold rounded-md text-xl px-3 py-2"
+              onClick={() => this.setState({regresar: true})}
+          >
+            Regresar al menu
+          </button>
+
+        </div>
+      )
     }
 
     return (
