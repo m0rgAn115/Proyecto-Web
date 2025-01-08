@@ -1,1 +1,0 @@
-en esta carpeta se guardan los audios cargados por el administrador
