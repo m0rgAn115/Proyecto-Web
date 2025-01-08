@@ -7,7 +7,7 @@ const Presentacion = () => {
     return (
       <div className="index_estilo">
         <header className="encabezado">
-          <h1 className="titulos">PRÁCTICA 6: MÓDULO DE LOGIN - ORM - CRUD (EQUIPO)</h1>
+          <h1 className="titulos">PROYECTO FINAL</h1>
           <h2 className="subtitulos">Proyecto:</h2>
           <p className="texto">
             Aplicación web reconocimiento de sílabas por voz utilizando TensorFlow.js, React con ECMAScript 6, Babel, Webpack y Node.js
