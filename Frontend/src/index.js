@@ -9,8 +9,6 @@ import Presentacion from "./presentacion";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/styles.css";
 import Memoria from "./components/Juegos/Memoria";
-import Juego1 from "./components/Juegos/Juego1"; 
-import Juego3 from "./components/Juegos/Juego3"; 
 import './index.css';
 import { Trivia } from "./components/Juegos/Trivia";
 import { Historia_Inmersiva } from "./components/Juegos/Historia_Inmersiva";
