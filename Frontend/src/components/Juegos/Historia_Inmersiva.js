@@ -21,7 +21,8 @@ export const Historia_Inmersiva = () => {
   
   const history = useHistory();
 
-  
+
+  const hora_inicio = new Date().toLocaleTimeString()
 
   useEffect(() => {
     cargar_datos()
@@ -93,7 +94,7 @@ export const Historia_Inmersiva = () => {
 
   if(juego_iniciado) 
     return (
-      <Historia tema={input_value} id_partida={partidaData.id} />
+      <Historia tema={input_value} id_partida={partidaData.id} hora_inicio={new Date().toLocaleTimeString("en-GB")} />
     )
 
 
