@@ -321,15 +321,6 @@ export const Historia = ({ tema, id_partida, hora_inicio }) => {
           <p className='text-white mt-3' >Diga una opcion!</p>
         </div>
 
-        {es_correcta != undefined && (
-            <div className={`absolute opacity-90 top-20 left-1/2 transform -translate-x-1/2 text-xl -translate-y-1/2 p-4 rounded shadow-lg text-white ${
-              es_correcta== true ? "bg-green-500" : "bg-red-500"
-            }`}>
-              <p className="text-center  font-bold">
-                { es_correcta== true ? "Respuesta Correcta! ✅" : "Respuesta Incorrecta! ❌"}
-              </p>
-            </div>
-          )}
       </>
       }
       
