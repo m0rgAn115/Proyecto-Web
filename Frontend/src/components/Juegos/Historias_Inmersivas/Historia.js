@@ -6,24 +6,16 @@ import { useParams, useHistory } from "react-router-dom";
 
 export const Historia = ({ tema, id_partida }) => {
 
-  const [preguntas, setpreguntas] = useState(undefined)
-  const [indice_pregunta_actual, set_indice_pregunta_actual] = useState(0)
   const [model, setmodel] = useState(undefined)
   const [labels, setlabels] = useState([])
-  const [es_correcta, set_es_correcta] = useState(undefined)
-  const [respuestas, setrespuestas] = useState([])
   const [terminado, setterminado] = useState(false)
-  const [puntos_por_pregunta, setpuntos_por_pregunta] = useState(0)
 
   const [cantidad_respuestas, set_cantidad_respuestas] = useState(0);
 
   const history = useHistory();
 
-
   // Estados de historia
   const [historia_data, sethistoria_data] = useState(undefined)
-
-  
 
   useEffect(() => {
     loadModel()
@@ -35,18 +27,6 @@ export const Historia = ({ tema, id_partida }) => {
       await recognizer.ensureModelLoaded()
       setmodel(recognizer)
       setlabels( recognizer.wordLabels())
-  }
-
-  const validar_comando = (comando) => {
-    switch(comando){
-      case "up":  return preguntas[indice_pregunta_actual].indice_correcto == 0
-      case "right":  return preguntas[indice_pregunta_actual].indice_correcto == 1
-      case "down":  return preguntas[indice_pregunta_actual].indice_correcto == 2
-      case "left":  return preguntas[indice_pregunta_actual].indice_correcto == 3
-      default: {
-        return undefined
-      }
-    }
   }
 
   const convertir_respuesta = (comando) => {
@@ -149,31 +129,6 @@ export const Historia = ({ tema, id_partida }) => {
       });
   }
 
-  const obtener_preguntas = () => {
-    axios
-      .post("http://localhost:9999/model/generar-trivia",
-      {
-        tema
-      }) 
-      .then((response) => {
-        const preguntas_obtenidas = response.data.preguntas
-        const puntos = response.data.puntuacion
-        console.log(preguntas_obtenidas);
-        console.log(response);
-        console.log(puntos);
-        if(preguntas_obtenidas != undefined)
-          setpreguntas(preguntas_obtenidas)
-
-        if(puntos != undefined)
-          setpuntos_por_pregunta(puntos)
-
-
-
-      })
-      .catch((err) => {
-        console.error("Error al obtener los temas sugeridos:", err);
-      });
-  }
 
   const obtener_comando_por_indice = (index) => {
     switch(index){
@@ -209,38 +164,6 @@ export const Historia = ({ tema, id_partida }) => {
 
   }
 
-  const obtener_mensaje_final = () => {
-    const porcentaje = respuestas.filter(value => value === true).length / respuestas.length
-
-    switch (true) {
-      case porcentaje === 0:
-          return "¡No diste una! 😭 ¡La próxima vez será mejor!";
-          
-      case porcentaje <= 0.10:
-          return "¡Hey! Una es mejor que ninguna 🌱 ¡Sigue intentando!";
-          
-      case porcentaje <= 0.30:
-          return "¡Vas por buen camino! 🌟 Un poco más de práctica y lo dominarás.";
-          
-      case porcentaje <= 0.50:
-          return "¡No está mal! 👍 Ya dominas la mitad del tema.";
-          
-      case porcentaje <= 0.70:
-          return "¡Muy bien! 🎯 Estás dominando el tema.";
-          
-      case porcentaje <= 0.90:
-          return "¡Excelente trabajo! 🎉 ¡Casi perfecto!";
-          
-      case porcentaje <= 0.99:
-          return "¡Impresionante! 🌟 ¡Eres casi un experto!";
-          
-      case porcentaje === 1:
-          return "¡PERFECTO! 🏆 ¡Has alcanzado la excelencia!";
-          
-      default:
-          return "¡Sigue intentando! 💪";
-      }
-  }
 
   const obtener_puntacion = ( ) => {
     return cantidad_respuestas*100
@@ -276,11 +199,12 @@ export const Historia = ({ tema, id_partida }) => {
     {
       terminado ?
         <div className='text-white font-mono' >
-          <p className='font-2xl' > { obtener_mensaje_final() } </p>          
+          <p className='font-2xl' >  Haz tenido una historia interesante!  </p>          
           <p className='font-lg' > Tema: {tema} </p> 
           <p className='font-lg' > Puntuacion: <span className='font-bold' > { obtener_puntacion() } </span> </p> 
+          <p className='font-lg' > Duracion: <span className='font-bold' > { obtener_puntacion() } </span> </p> 
           <button 
-          className="font-bold hover:scale-[1.03] flex items-center text-white" 
+          className="font-bold hover:scale-[1.03] mt-10 flex items-center text-white" 
           onClick={() => history.push(`/Proyecto/administrador`)}
             >
           <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 text-white transform scale-x-[-1]" width={12} height={24} viewBox="0 0 12 24">
