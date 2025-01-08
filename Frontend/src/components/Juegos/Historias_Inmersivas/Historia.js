@@ -4,7 +4,7 @@ import PulsingMicButton from '../../PulsingMicButton'
 import * as tf from "@tensorflow/tfjs"
 import { useParams, useHistory } from "react-router-dom"; 
 
-export const Preguntas = ({ tema, id_partida }) => {
+export const Historia = ({ tema, id_partida }) => {
 
   const [preguntas, setpreguntas] = useState(undefined)
   const [indice_pregunta_actual, set_indice_pregunta_actual] = useState(0)
@@ -15,7 +15,15 @@ export const Preguntas = ({ tema, id_partida }) => {
   const [terminado, setterminado] = useState(false)
   const [puntos_por_pregunta, setpuntos_por_pregunta] = useState(0)
 
+  const [cantidad_respuestas, set_cantidad_respuestas] = useState(0);
+
   const history = useHistory();
+
+
+  // Estados de historia
+  const [historia_data, sethistoria_data] = useState(undefined)
+
+  
 
   useEffect(() => {
     loadModel()
@@ -41,41 +49,34 @@ export const Preguntas = ({ tema, id_partida }) => {
     }
   }
 
+  const convertir_respuesta = (comando) => {
+    console.log("len", historia_data.options.length);
+    
+    switch(comando){
+      case "up": 
+        return historia_data.options.length >= 1 ? historia_data.options[0].text : undefined;
+      case "right":
+        return historia_data.options.length >= 2 ? historia_data.options[1].text : undefined;
+      case "down":
+        return historia_data.options.length >= 3 ? historia_data.options[2].text : undefined;
+      case "left":
+        return historia_data.options.length >= 4 ? historia_data.options[3].text : undefined;
+      default: {
+        console.log("entro undf");
+        return undefined;
+      }
+    }
+}
+
   const validar_respuesta = (respuesta) => {
     if(respuesta != undefined){
       model.stopListening()
+
+      console.log("respuesta: ", respuesta);
       
-    if( respuesta ){
-      setrespuestas((prev) => [...prev, true])
-      set_es_correcta(true)
-      setTimeout(() => set_es_correcta(undefined), 2000)
-    }else {
-      setrespuestas((prev) => [...prev, false])
-      set_es_correcta(false)
-      setTimeout(() => set_es_correcta(undefined), 2000)
+      
+      enviar_respuesta(respuesta)
     }
-
-    console.log("indice: ", indice_pregunta_actual, "lenght: ", preguntas.length);
-    
-
-    if(indice_pregunta_actual < preguntas.length - 1){
-      set_indice_pregunta_actual((prev) => prev+1)
-    }else {
-      setterminado(true)
-      guardar_partida()
-    }
-     
-    }
-  }
-
-  const validar = (comando) => {
-    console.log(comando);
-    
-    const respuesta = validar_comando(comando)
-
-    console.log("respuesta:", respuesta);
-
-    validar_respuesta(respuesta)
   }
   
   const recognizeCommands = async () => {
@@ -88,7 +89,12 @@ export const Preguntas = ({ tema, id_partida }) => {
 
         console.log("comando: ", comando);
   
-        validar(comando)
+        const respuesta = convertir_respuesta(comando)
+        console.log("respuesta: ", respuesta);
+
+        
+
+        validar_respuesta(respuesta)
         
       },
       { includeSpectrogram: true, probabilityThreshold: 0.90 }
@@ -97,9 +103,51 @@ export const Preguntas = ({ tema, id_partida }) => {
 
 
   useEffect(() => {
-    obtener_preguntas()
+    iniciar_historia()
   
   }, [tema])
+
+  const iniciar_historia = () => {
+    axios
+      .post("http://localhost:9999/model/generar-historia",
+      {
+        reset: true,
+        tema
+      }) 
+      .then((response) => {
+        const respuesta = response.data.data
+        console.log(respuesta);
+        
+        if(respuesta != undefined)
+          sethistoria_data(respuesta)
+
+      })
+      .catch((err) => {
+        console.error("Error al obtener los temas sugeridos:", err);
+      });
+  }
+
+  const enviar_respuesta = (comando) => {
+    console.log("comando: ", comando);
+    set_cantidad_respuestas((prev) => prev+1)
+    
+    axios
+      .post("http://localhost:9999/model/generar-historia",
+      {
+        comando
+      }) 
+      .then((response) => {
+        const respuesta = response.data.data
+        console.log(respuesta);
+        
+        
+        if(respuesta != undefined)
+          sethistoria_data(respuesta)
+      })
+      .catch((err) => {
+        console.error("Error al obtener los temas sugeridos:", err);
+      });
+  }
 
   const obtener_preguntas = () => {
     axios
@@ -133,7 +181,7 @@ export const Preguntas = ({ tema, id_partida }) => {
       case 1: return "right"
       case 2: return "down"
       case 3: return "left"
-      default: return "Up"
+      default: return "up"
 
     }
   }
@@ -195,7 +243,7 @@ export const Preguntas = ({ tema, id_partida }) => {
   }
 
   const obtener_puntacion = ( ) => {
-    return respuestas.filter(value => value === true).length * puntos_por_pregunta
+    return cantidad_respuestas*100
   }
 
   const guardar_partida = () => {
@@ -215,41 +263,78 @@ export const Preguntas = ({ tema, id_partida }) => {
     }
   }
 
+  const on_terminar_juego = () => {
+    console.log(cantidad_respuestas);
+    
+    guardar_partida()
+    setterminado(true)
+  }
+
   return (
     <div className='relative bg-slate-900 h-screen w-full flex flex-col items-center justify-around'>
-    <button className=" font-bold hover:scale-[1.03] flex w-full items-left mx-10 text-white" onClick={() => history.push(`/Proyecto/administrador`)}>
-      <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 text-white transform scale-x-[-1]" width={12} height={24} viewBox="0 0 12 24"><path fill="currentColor" fillRule="evenodd" d="M10.157 12.711L4.5 18.368l-1.414-1.414l4.95-4.95l-4.95-4.95L4.5 5.64l5.657 5.657a1 1 0 0 1 0 1.414"></path></svg>
-      Regresar
-    </button>
+   
     {
       terminado ?
         <div className='text-white font-mono' >
           <p className='font-2xl' > { obtener_mensaje_final() } </p>          
           <p className='font-lg' > Tema: {tema} </p> 
           <p className='font-lg' > Puntuacion: <span className='font-bold' > { obtener_puntacion() } </span> </p> 
+          <button 
+          className="font-bold hover:scale-[1.03] flex items-center text-white" 
+          onClick={() => history.push(`/Proyecto/administrador`)}
+            >
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 text-white transform scale-x-[-1]" width={12} height={24} viewBox="0 0 12 24">
+            <path fill="currentColor" fillRule="evenodd" d="M10.157 12.711L4.5 18.368l-1.414-1.414l4.95-4.95l-4.95-4.95L4.5 5.64l5.657 5.657a1 1 0 0 1 0 1.414"></path>
+          </svg>
+          Regresar
+        </button>
         </div>         
       :
 
       <>
-      <div className='w-4/5 bg-white shadow-[0_0_20px_rgba(255,255,255,1)] p-3 rounded-md
-                      text-xl text-center font-mono
+
+      <div className='flex justify-between px-10 w-full' >
+
+        <button 
+          className="font-bold hover:scale-[1.03] flex items-center text-white" 
+          onClick={() => history.push(`/Proyecto/administrador`)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 text-white transform scale-x-[-1]" width={12} height={24} viewBox="0 0 12 24">
+            <path fill="currentColor" fillRule="evenodd" d="M10.157 12.711L4.5 18.368l-1.414-1.414l4.95-4.95l-4.95-4.95L4.5 5.64l5.657 5.657a1 1 0 0 1 0 1.414"></path>
+          </svg>
+          Regresar
+        </button>
+
+
+        <button 
+          className=" m-0 font-bold hover:scale-[1.03] flex items-center text-white" 
+          onClick={() => on_terminar_juego()}
+        >
+          Terminar Partida
+        </button>
+
+      </div>
+
+
+      <div className='w-4/5 bg-white shadow-[0_0_20px_rgba(255,255,255,1)] p-2 rounded-md
+                      text-sm text-justify font-mono
       ' >
         {
-          preguntas && 
-            preguntas[indice_pregunta_actual].pregunta
+          historia_data!== undefined && 
+            historia_data.description
         }
       </div>
 
-      <div className='grid grid-cols-2 gap-y-2 gap-x-4 w-3/5 mx-auto' >
+      <div className={`grid mx-auto grid-cols-2 gap-y-2 gap-x-5 w-3/5 place-items-center`}>
           {
-            preguntas &&
-              preguntas[indice_pregunta_actual].opciones.map((opc, index) => (
+             historia_data!== undefined && historia_data.options !== undefined &&
+              historia_data.options.map((opc, index) => (
                 <div className={`flex ${ obtener_color_por_indice(index, 0)} `}  
+
+                  onClick={() => validar_respuesta(opc.text)}
                 >
 
-                  <div className={`w-1/5 flex flex-col items-center justify-center  ${ obtener_color_por_indice(index,1)}`} 
-                    onClick={() => validar(obtener_comando_por_indice(index))}
-                  >
+                  <div className={`w-1/5 h-auto flex flex-col items-center justify-center  ${ obtener_color_por_indice(index,1)}`}  >
                         <svg
                         xmlns="http://www.w3.org/2000/svg"
                         style={{
@@ -261,16 +346,16 @@ export const Preguntas = ({ tema, id_partida }) => {
                       >
                         <path fill="currentColor" d="M12 21c-1.654 0-3-1.346-3-3v-4.764c-1.143 1.024-3.025.979-4.121-.115a3 3 0 0 1 0-4.242L12 1.758l7.121 7.121a3 3 0 0 1 0 4.242c-1.094 1.095-2.979 1.14-4.121.115V18c0 1.654-1.346 3-3 3M11 8.414V18a1.001 1.001 0 0 0 2 0V8.414l3.293 3.293a1.023 1.023 0 0 0 1.414 0a1 1 0 0 0 0-1.414L12 4.586l-5.707 5.707a1 1 0 0 0 0 1.414a1.023 1.023 0 0 0 1.414 0z"></path>
                       </svg>
-                      <p className='font-bold' > {obtener_comando_por_indice(index)} </p>
+                      <p className='font-bold text-sm' > {obtener_comando_por_indice(index)} </p>
                       
                   </div>
                   <p key={index}
-                    className={`w-4/5 inline-flex rounded-md p-5 items-center justify-center text-xl font-mono
+                    className={`w-4/5 inline-flex rounded-md p-1 items-center justify-center text-sm font-mono
                          
                           `}
                   > 
                     {
-                      opc
+                      opc.text
                     }
                   </p>
               </div>

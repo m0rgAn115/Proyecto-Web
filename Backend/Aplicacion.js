@@ -433,70 +433,100 @@ app.get('/model/generar-temas', async (req, res) => {
   res.status(200).json({ data: obj });
 })
 
+// Ejemplo de variable global o compartida que guarda el historial de la conversación
 let conversationHistory = [];
 
+// Función de ejemplo para resumir el historial.
+// Idealmente podrías usar otra llamada al modelo para resumir inteligentemente.
+// Aquí, simplemente tomamos los últimos mensajes y creamos un texto corto.
+function resumirHistorial(conversationHistory) {
+  const mensajesAsistente = conversationHistory.filter(msg => msg.role === "assistant");
+  const ultimaDescripcion = mensajesAsistente.length > 0 ? mensajesAsistente.slice(-1)[0].content : "";
+  return `Resumen de la historia hasta ahora: ${ultimaDescripcion.slice(0, 300)}... (Fin del resumen)`;
+}
+
+// Ajusta esto a tu modelo y a tus necesidades
 async function generarHistoria(tema, comando) {
   try {
-    // if(conversationHistory.length > 5){
-    //   conversationHistory.reduce
-    // }
-    // Agregar el mensaje del usuario al historial
+    // Límite de mensajes en el historial para antes de resumir
+    const MAX_MESSAGES = 8;
 
-    if(conversationHistory.length==0 && tema!= undefined)
+    // Mensaje inicial de tipo "system", que solo agregamos si el historial está vacío.
+    if (conversationHistory.length === 0) {
       conversationHistory.push({
-        role: "user",
-        content: `Eres un creador de juegos de escape interactivos. El jugador está atrapado en un lugar virtual y debe resolver acertijos para escapar. Deberas crear el juego en base al siguiente tema: ${tema}
-
-                  Te daré el historial de la conversación entre el jugador y el juego, junto con el último comando ingresado por el jugador. Basándote en esto, debes generar la siguiente parte del juego, describiendo el entorno actual, las acciones posibles y los comandos asociados a ellas.
-
-                  Tu respuesta debe estar en formato JSON, con las siguientes claves:
-
-                  "description": Describe el entorno actual y cualquier detalle relevante (objetos, pistas, etc.).
-                  "options": Una lista de objetos que represente las acciones posibles. Cada objeto debe incluir:
-                  "text": La acción que el jugador puede realizar.
-                  "command": El comando de voz asociado a la acción.
-                  Ejemplo de respuesta: 
-                  {
-                    "description": "Estás en una habitación oscura con una puerta cerrada frente a ti. A tu izquierda hay un escritorio con un cajón, y a tu derecha hay una ventana bloqueada.",
-                    "options": [
-                      { "text": "Abrir el cajón del escritorio", "command": "left" },
-                      { "text": "Inspeccionar la puerta cerrada", "command": "up" },
-                      { "text": "Mirar por la ventana bloqueada", "command": "right" }
-                    ]
-                  }
-
-                  Responde únicamente en formato JSON, sin ningún texto adicional. Si el jugador realiza un comando incorrecto o no válido, devuelve una descripción adecuada y opciones para continuar.
-
-                  `,
-      });
-    else {
-      conversationHistory.push({
-        role: "user",
-        content: `El usuario decidio: ${comando}`,
+        role: "system",
+        content: `
+Eres un creador de historias interactivas. Tu objetivo es continuar la narrativa de manera coherente y fluida, sin repetir información innecesaria. 
+Debes avanzar la historia basándote en los mensajes anteriores y el último comando del usuario.
+Sigue estas reglas:
+1. No repitas descripciones ni acciones que ya hayan ocurrido.
+2. Aporta detalles nuevos y relevantes para enriquecer la narrativa.
+3. Mantén la coherencia con el contexto e integra las decisiones tomadas.
+4. Responde siempre en un **formato JSON** para que la respuesta sea válida.
+5. Tu respuesta debe contener las llaves "description" y "options", donde "options" es una lista de objetos con "text" y "command".
+      `
       });
     }
 
-    // Si tienes datos adicionales (como fecha, reservación, etc.), inclúyelos en el mensaje
+    // Si hay un tema y solo tenemos el mensaje de tipo "system", lo agregamos como user
+    // para dar contexto inicial y forzar la inclusión de la palabra "json".
+    if (conversationHistory.length === 1 && tema) {
+      conversationHistory.push({
+        role: "user",
+        content: `
+Crea una historia basada en el tema: "${tema}".
+Recuerda: 
+- Responde **exclusivamente** en formato JSON, sin añadir texto fuera de las llaves.
+- Debes usar las claves "description" y "options".
+      `
+      });
+    }
 
-    // Enviar el historial completo de mensajes al modelo
+    // Agregamos el comando del usuario, si existe
+    if (comando) {
+      conversationHistory.push({
+        role: "user",
+        content: `El usuario ingresa la acción: ${comando}. Recuerda responder en JSON.`
+      });
+    }
+
+    // Antes de llamar al modelo, verificamos si se excede el límite de historial
+    if (conversationHistory.length > MAX_MESSAGES) {
+      const resumen = resumirHistorial(conversationHistory);
+
+      // Reiniciamos el historial con el resumen y los últimos mensajes
+      conversationHistory = [
+        {
+          role: "system",
+          content: resumen
+        },
+        ...conversationHistory.slice(-2) // Mantén los últimos dos mensajes para contexto
+      ];
+    }
+
+    // Llamamos al modelo de Groq
     const response = await groq.chat.completions.create({
       messages: conversationHistory,
       model: MODEL,
-      response_format: {"type": "json_object"}
+      response_format: { type: "json_object" } // Indicamos que queremos un JSON válido
     });
 
     const respuesta_modelo = response.choices[0]?.message?.content;
 
+    // Agregamos la respuesta al historial (como si fuera el "assistant")
     conversationHistory.push({
-      role: "system",  // Puedes usar "system" para incluir datos relevantes en el historial
-      content: `Contexto de historia: ${JSON.stringify(respuesta_modelo)}`,
+      role: "assistant",
+      content: respuesta_modelo,
     });
 
-    return respuesta_modelo
+    // Regresamos la respuesta al cliente
+    return respuesta_modelo;
   } catch (error) {
     throw new Error(`Error en Groq: ${error.message}`);
   }
 }
+
+module.exports = { generarHistoria, conversationHistory };
 
 
 app.post('/model/generar-historia', async (req, res) => {
@@ -507,10 +537,111 @@ app.post('/model/generar-historia', async (req, res) => {
     conversationHistory = []
   }
 
-  const response = await generarHistoria(tema, comando)
 
+  try {
+    const response = await generarHistoria(tema, comando)
+
+    const obj = JSON.parse(response);
+  
+    res.status(200).json({ data: obj });
+
+  } catch (error) {
+    // Aquí manejamos el error, sin "romper" la aplicación
+    console.error('Ocurrió un error:', error.message);
+    res.status(400).json({ error: error.message });
+
+  }
+
+
+ 
+})
+
+async function generar_temas_historias() {
+  try {
+
+    // Enviar el historial completo de mensajes al modelo
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: `
+          Eres un experto creador de historias interactivas donde los jugadores pueden tomar decisiones. Tu tarea es generar una lista de 10 emocionantes escenarios narrativos, cada uno con emojis representativos.
+
+          Requisitos para las historias:
+          - Cada historia debe incluir 2-3 emojis que representen su temática
+          - Las historias deben ser diversas y cubrir diferentes géneros:
+            * Fantasía y magia ⚔️🧙‍♂️
+            * Ciencia ficción 🚀👽
+            * Aventuras y exploración 🗺️🏃‍♂️
+            * Misterio y crimen 🔍🕵️‍♂️
+            * Terror y suspenso 👻😱
+            * Romance y drama ❤️😢
+            * Historia alternativa 📜🌍
+            * Supervivencia 🏕️💪
+            * Comedia 😂🎭
+            * Vida cotidiana 🏠💼
+
+          El formato de respuesta debe ser un objeto JSON con esta estructura:
+          {
+            "historias": [
+              {
+                "titulo": "Nombre de la historia + emoji(s)",
+                "descripcion": "Breve descripción del escenario inicial",
+                "genero": "Género principal de la historia + emoji(s)"
+              }
+            ]
+          }
+
+          Ejemplos de historias bien formateadas:
+          {
+            "historias": [
+              {
+                "titulo": "La Academia de Magia 🔮✨🏰",
+                "descripcion": "Te despiertas en tu primer día en la prestigiosa Academia Arcana. Descubres que tienes un don único para la magia, pero también un misterioso destino que cumplir.",
+                "genero": "Fantasía y magia ⚔️🧙‍♂️"
+              },
+              {
+                "titulo": "Colonos de Marte 🚀👨‍🚀🔴",
+                "descripcion": "Eres parte de la primera colonia humana en Marte. Una tormenta solar amenaza la base y debes tomar decisiones cruciales para la supervivencia.",
+                "genero": "Ciencia ficción 🚀👽"
+              },
+              {
+                "titulo": "El Último Tren 🚂🌙",
+                "descripcion": "Te encuentras en un misterioso tren nocturno donde los pasajeros comienzan a desaparecer. Debes descubrir qué está sucediendo antes de que sea demasiado tarde.",
+                "genero": "Misterio y suspense 🔍😱"
+              },
+              {
+                "titulo": "Startup Dreams 💻💡",
+                "descripcion": "Has heredado una startup en quiebra. Con solo un mes de fondos restantes, debes tomar decisiones empresariales cruciales para salvar la compañía.",
+                "genero": "Vida cotidiana 🏠💼"
+              },
+              {
+                "titulo": "La Expedición Perdida 🗺️🏔️",
+                "descripcion": "Lideras una expedición en busca de una antigua civilización en el Himalaya. Cada decisión puede significar la diferencia entre el descubrimiento y el desastre.",
+                "genero": "Aventuras y exploración 🗺️🏃‍♂️"
+              }
+            ]
+          }
+
+          ÚNICAMENTE DEVUELVE UN JSON CORRECTAMENTE FORMATEADO.
+          `,
+        }
+      ],
+      model: MODEL,
+      response_format: {"type": "json_object"}
+    });
+
+    return response.choices[0]?.message?.content
+  } catch (error) {
+    throw new Error(`Error en Groq: ${error.message}`);
+  }
+}
+
+app.get('/model/generar-temas-historias', async (req, res) => {
+
+  const response = await generar_temas_historias()
 
   const obj = JSON.parse(response);
   
-  res.status(200).json({ data: obj });
+  res.status(200).json({ historias: obj.historias });
 })
