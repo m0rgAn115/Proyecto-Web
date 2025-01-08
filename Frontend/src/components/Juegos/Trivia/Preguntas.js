@@ -4,7 +4,7 @@ import PulsingMicButton from '../../PulsingMicButton'
 import * as tf from "@tensorflow/tfjs"
 import { useParams, useHistory } from "react-router-dom"; 
 
-export const Preguntas = ({ tema, id_partida }) => {
+export const Preguntas = ({ tema, id_partida, hora_inicio }) => {
 
   const [preguntas, setpreguntas] = useState(undefined)
   const [indice_pregunta_actual, set_indice_pregunta_actual] = useState(0)
@@ -14,6 +14,9 @@ export const Preguntas = ({ tema, id_partida }) => {
   const [respuestas, setrespuestas] = useState([])
   const [terminado, setterminado] = useState(false)
   const [puntos_por_pregunta, setpuntos_por_pregunta] = useState(0)
+
+  const [duracion, setduracion] = useState(0)
+  const [puntuacion, setpuntuacion] = useState(0)
 
   const history = useHistory();
 
@@ -62,7 +65,12 @@ export const Preguntas = ({ tema, id_partida }) => {
       set_indice_pregunta_actual((prev) => prev+1)
     }else {
       setterminado(true)
-      guardar_partida()
+      const tiempo = obtener_duracion_partida()
+      const puntuacion = obtener_puntacion()
+      setduracion(tiempo)
+      setpuntuacion(puntuacion)
+      guardar_partida(puntuacion,tiempo)
+
     }
      
     }
@@ -198,11 +206,31 @@ export const Preguntas = ({ tema, id_partida }) => {
     return respuestas.filter(value => value === true).length * puntos_por_pregunta
   }
 
-  const guardar_partida = () => {
+  const obtener_duracion_partida = () => {
+    // Convierte las horas a objetos Date
+    const hora_fin = new Date().toLocaleTimeString("en-GB");
+
+    console.log("hora inicio: ", hora_inicio);
+    console.log("hora fin: ", hora_fin);
+    
+    const date1 = new Date(`1970-01-01T${hora_inicio}Z`);
+    const date2 = new Date(`1970-01-01T${hora_fin}Z`);
+
+    // Obtén la diferencia en milisegundos y conviértela a segundos
+    const differenceInSeconds = (date2 - date1) / 1000;
+
+    console.log("timepo: ", differenceInSeconds);
+    
+
+    return differenceInSeconds;
+  }
+
+  const guardar_partida = (puntuacion,tiempo) => {
     if (id_partida) {
       axios
       .put(`http://localhost:9999/partidas/${id_partida}`, {
-        puntuacion: obtener_puntacion(),
+        puntuacion: puntuacion,
+        duracion: tiempo
       }).then(() => {
         console.log("Partida Actualizada Correctamente!");
         
@@ -226,7 +254,9 @@ export const Preguntas = ({ tema, id_partida }) => {
         <div className='text-white font-mono' >
           <p className='font-2xl' > { obtener_mensaje_final() } </p>          
           <p className='font-lg' > Tema: {tema} </p> 
-          <p className='font-lg' > Puntuacion: <span className='font-bold' > { obtener_puntacion() } </span> </p> 
+          <p className='font-lg' > Puntuacion: <span className='font-bold' > { puntuacion } </span> </p> 
+          <p className='font-lg' > Duracion (segundos): <span className='font-bold' > { duracion } </span> </p> 
+
         </div>         
       :
 

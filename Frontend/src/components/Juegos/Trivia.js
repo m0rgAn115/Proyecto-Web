@@ -75,7 +75,7 @@ export const Trivia = () => {
 
   if(juego_iniciado) 
     return (
-      <Preguntas tema={input_value} id_partida={partidaData.id} />
+      <Preguntas tema={input_value} id_partida={partidaData.id} hora_inicio={new Date().toLocaleTimeString("en-GB")} />
     )
 
 

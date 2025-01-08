@@ -131,6 +131,18 @@ const VerPartida = () => {
                     className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-left text-gray-700 font-medium">
+                    Duracion:
+                  </label>
+                  <input
+                    type="text"
+                    value={partidaData.duracion!=undefined ? partidaData.duracion : "Sin duracion"}
+                    readOnly
+                    className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 mt-1"
+                  />
+                </div>
               </form>
             </div>
 

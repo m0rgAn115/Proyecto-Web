@@ -22,7 +22,7 @@
     "util-deprecate": "^1.0.2"
   },
   "scripts": {
-    "start": "node Aplicacion.js"
+    "start": "node src/Aplicacion.js"
   },
   "keywords": [],
   "author": "",
