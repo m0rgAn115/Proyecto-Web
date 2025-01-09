@@ -8,8 +8,8 @@ class Login extends React.Component {
     this.state = {
       condition: false,
       tipousuario: '',
-      usuario: "admin",
-      password: 1234,
+      usuario: "",
+      password: '',
       error: '',
       validado: false,
       showModal: false,
