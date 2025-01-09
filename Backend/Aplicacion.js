@@ -1,10 +1,10 @@
-const { sequelize } = require('./models/index.js');
+const { sequelize } = require('./src/models/index.js');
 const express = require('express');
 const app = express();
 const puerto = 9999;
-const routes = require('./routes/index.js');
-const { Usuario, Rol } = require('./models/index.js');
-const seedData = require('./scripts/seedData'); // Importa la función de semillas
+const routes = require('./src/routes/index.js');
+const { Usuario, Rol } = require('./src/models/index.js');
+const seedData = require('./src/scripts/seedData'); // Importa la función de semillas
 
 // Middleware para manejo de CORS
 app.use((req, res, next) => {
